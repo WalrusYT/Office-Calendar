@@ -1,2 +1,4 @@
-package calendar.user;public interface Staff {
+package calendar.user;
+
+public interface Staff extends User{
 }

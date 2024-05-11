@@ -1,2 +1,4 @@
-package calendar.user;public interface Guest {
+package calendar.user;
+
+public interface Guest extends User{
 }

@@ -1,2 +1,4 @@
-package calendar.user;public interface Manager {
+package calendar.user;
+
+public interface Manager extends User{
 }
