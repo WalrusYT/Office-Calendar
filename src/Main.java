@@ -92,17 +92,9 @@ public class Main {
      */
     public static class Commands {
         public static final String
-        EXIT = "exit",
-        REGISTER = "register",
-        ACCOUNTS = "accounts",
-        CREATE = "create",
-        EVENTS = "events",
-        INVITE = "invite",
-        RESPONSE = "response",
-        EVENT = "event",
-        TOPICS = "topics",
-        HELP = "help";
-
+        EXIT = "exit", REGISTER = "register", ACCOUNTS = "accounts", CREATE = "create",
+        EVENTS = "events", INVITE = "invite", RESPONSE = "response", EVENT = "event",
+        TOPICS = "topics", HELP = "help";
     }
 
     /**

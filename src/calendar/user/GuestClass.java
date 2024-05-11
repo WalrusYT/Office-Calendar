@@ -1,5 +1,6 @@
 package calendar.user;
 
+import calendar.CalendarStatus;
 import calendar.Event;
 
 public class GuestClass extends UserClass implements Guest{
@@ -13,7 +14,7 @@ public class GuestClass extends UserClass implements Guest{
     }
 
     @Override
-    public CreateEventResponse promoteEvent(Event event) {
-        return CreateEventResponse.CANNOT_CREATE_ANY;
+    public CalendarStatus promoteEvent(Event event) {
+        return CalendarStatus.CANNOT_CREATE_ANY;
     }
 }
