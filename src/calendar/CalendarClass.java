@@ -17,29 +17,23 @@ public class CalendarClass implements Calendar{
         return accounts.containsKey(name);
     }
     @Override
-    public CalendarResponse addAccount(String name, User.Type type) {
-        if (hasAccount(name)) return CalendarResponse.ACCOUNT_ALREADY_EXISTS;
+    public CalendarStatus addAccount(String name, User.Type type) {
+        if (hasAccount(name)) return CalendarStatus.ACCOUNT_ALREADY_EXISTS;
         User user = switch (type) {
             case STAFF -> new StaffClass(name);
             case MANAGER -> new ManagerClass(name);
             case GUEST -> new GuestClass(name);
         };
         accounts.put(name, user);
-        return CalendarResponse.ACCOUNT_REGISTERED;
+        return CalendarStatus.ACCOUNT_REGISTERED;
     }
 
     @Override
-    public CalendarResponse addEvent(String userName, String eventName, Event.Priority priority, LocalDateTime date, Set<String> topics){
-        if (!hasAccount(userName)) return CalendarResponse.ACCOUNT_DOES_NOT_EXIST;
+    public CalendarStatus addEvent(String userName, String eventName, Event.Priority priority, LocalDateTime date, Set<String> topics){
+        if (!hasAccount(userName)) return CalendarStatus.ACCOUNT_DOES_NOT_EXIST;
         User user = accounts.get(userName);
         Event event = new EventClass(eventName, user, priority, date, topics);
-        return switch (user.promoteEvent(event)) {
-            case CANNOT_CREATE_ANY -> CalendarResponse.CANNOT_CREATE_ANY;
-            case CANNOT_CREATE_HIGH -> CalendarResponse.CANNOT_CREATE_HIGH;
-            case EVENT_EXISTS -> CalendarResponse.EVENT_EXISTS;
-            case IS_BUSY -> CalendarResponse.IS_BUSY;
-            case OK -> CalendarResponse.OK;
-        };
+        return user.promoteEvent(event);
     }
 
     @Override

@@ -5,10 +5,10 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 public class EventClass implements Event{
-    private String name;
-    private User promoter;
-    private Priority priority;
-    private LocalDateTime dateTime;
+    private final String name;
+    private final User promoter;
+    private final Priority priority;
+    private final LocalDateTime dateTime;
     private final Set<String> topics;
 
     public EventClass(

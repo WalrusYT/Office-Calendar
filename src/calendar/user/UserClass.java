@@ -10,13 +10,12 @@ public abstract class UserClass implements User {
     protected final String name;
     protected final Map<String, Event> events;
 
-
     public UserClass(String name) {
         this.name = name;
         events = new LinkedHashMap<>();
     }
 
-    protected boolean isBusy(LocalDateTime dateTime){
+    protected boolean isBusy(LocalDateTime dateTime) {
         for (Event event : events.values()){
             if (event.getDate().equals(dateTime)) return true;
         }
@@ -24,13 +23,12 @@ public abstract class UserClass implements User {
     }
 
     @Override
-    public String getName(){
+    public String getName() {
         return name;
     }
 
     @Override
-    public int compareTo(User o) {
-        return name.compareTo(o.getName());
+    public int compareTo(User u) {
+        return name.compareTo(u.getName());
     }
-
 }
