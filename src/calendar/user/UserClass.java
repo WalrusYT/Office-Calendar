@@ -3,6 +3,7 @@ package calendar.user;
 import calendar.Event;
 
 import java.time.LocalDateTime;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -30,5 +31,10 @@ public abstract class UserClass implements User {
     @Override
     public int compareTo(User u) {
         return name.compareTo(u.getName());
+    }
+
+    @Override
+    public Iterator<Event> getEvents() {
+        return events.values().iterator();
     }
 }
