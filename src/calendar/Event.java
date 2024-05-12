@@ -7,6 +7,10 @@ public interface Event {
     String getName();
     LocalDateTime getDate();
     Priority getPriority();
+    int getUnanswered();
+    int getAccepted();
+    int getRejected();
+    int getInvited();
 
 
     enum Priority {

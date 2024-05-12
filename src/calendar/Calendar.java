@@ -8,9 +8,14 @@ import java.util.Iterator;
 import java.util.Set;
 
 public interface Calendar {
+
     CalendarStatus addAccount(String name, User.Type type);
+
     Iterator<User> listAccounts();
+
     CalendarStatus addEvent(String userName, String eventName, Priority Priority, LocalDateTime date, Set<String> topics);
+
+    CalendarResponse<Iterator<Event>> userEvents(String userName);
 
     record CalendarResponse<T>(T result, CalendarStatus status) {
         public CalendarResponse(T result) {

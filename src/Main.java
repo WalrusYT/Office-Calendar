@@ -9,6 +9,7 @@ import java.util.Scanner;
 import java.util.Set;
 
 import calendar.Event;
+import calendar.Calendar.CalendarResponse;
 
 public class Main {
 
@@ -27,12 +28,14 @@ public class Main {
         in.close();
 
     }
+    
     private static void handleCommand(Scanner in, String command, Calendar calendar) {
         switch (command) {
             case Commands.HELP -> System.out.println(Feedback.HELP);
             case Commands.REGISTER -> register(calendar, in);
             case Commands.ACCOUNTS -> listAccounts(calendar);
             case Commands.CREATE -> create(calendar, in);
+            case Commands.EVENTS -> events(calendar, in);
             case Commands.EXIT -> System.out.println(Feedback.BYE);
             default -> System.out.printf(Feedback.UNKNOWN_COMMAND, command.toUpperCase());
         }
@@ -77,12 +80,30 @@ public class Main {
             return;
         }
         switch (calendar.addEvent(userName, eventName, priority, date, topics)) {
-            case ACCOUNT_DOES_NOT_EXIST -> System.out.printf(Feedback.ACCOUNT_DOES_NOT_EXIST, userName);
+            case NO_ACCOUNT -> System.out.printf(Feedback.NO_ACCOUNT, userName);
             case CANNOT_CREATE_ANY -> System.out.printf(Feedback.CANNOT_CREATE_ANY, userName);
             case CANNOT_CREATE_HIGH -> System.out.printf(Feedback.CANNOT_CREATE_HIGH, userName);
             case EVENT_EXISTS -> System.out.printf(Feedback.EVENT_EXISTS, eventName, userName);
             case IS_BUSY -> System.out.printf(Feedback.IS_BUSY, userName);
             case OK -> System.out.printf(Feedback.EVENT_SCHEDULED, eventName);
+            default -> System.out.println(Feedback.UNEXPECTED_ERROR);
+        }
+    }
+
+    private static void events(Calendar calendar, Scanner in) {
+        String userName = in.next();
+        CalendarResponse<Iterator<Event>> response = calendar.userEvents(userName);
+        switch (response.status()) {
+            case NO_ACCOUNT -> System.out.printf(Feedback.NO_ACCOUNT, userName);
+            case OK -> {
+                System.out.printf(Feedback.EVENTS, userName);
+                Iterator<Event> events = response.result();
+                while (events.hasNext()) {
+                    Event event = events.next();
+                    System.out.printf(Feedback.EVENT, event.getName(), event.getInvited(),
+                        event.getAccepted(), event.getRejected(), event.getUnanswered());
+                }
+            }
             default -> System.out.println(Feedback.UNEXPECTED_ERROR);
         }
     }
@@ -123,12 +144,14 @@ public class Main {
         ALREADY_EXISTS = "%s already exists.%n",
         NO_ACCOUNTS = "No accounts registered.",
         ACCOUNTS = "All accounts:",
-        ACCOUNT_DOES_NOT_EXIST = "Account %s does not exist.%n",
+        NO_ACCOUNT = "Account %s does not exist.%n",
         CANNOT_CREATE_ANY = "Guest account %s cannot create events.%n",
         CANNOT_CREATE_HIGH = "Account %s cannot create high priority events.%n",
         EVENT_EXISTS = "%s already exists in account %s%n",
         IS_BUSY = "Account %s is busy.%n",
         EVENT_SCHEDULED = "%s is scheduled%n",
+        EVENTS = "Account %s events:%n",
+        EVENT = "%s status [invited %d] [accepted %d] [rejected %d] [unanswered %d]%n",
         UNEXPECTED_ERROR = "Unexpected error.";
     }
 

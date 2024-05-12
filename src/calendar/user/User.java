@@ -1,12 +1,19 @@
 package calendar.user;
 
+import java.util.Iterator;
+
 import calendar.CalendarStatus;
 import calendar.Event;
 
 public interface User extends Comparable<User> {
+
     String getName();
+
     Type getType();
+
     CalendarStatus promoteEvent(Event event);
+    
+    Iterator<Event> getEvents();
     
     enum Type {
         STAFF, MANAGER, GUEST;

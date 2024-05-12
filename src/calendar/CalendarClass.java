@@ -11,11 +11,14 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.Set;
 
-public class CalendarClass implements Calendar{
+public class CalendarClass implements Calendar {
+
     SortedMap<String, User> accounts = new TreeMap<>();
+
     private boolean hasAccount(String name){
         return accounts.containsKey(name);
     }
+
     @Override
     public CalendarStatus addAccount(String name, User.Type type) {
         if (hasAccount(name)) return CalendarStatus.ACCOUNT_ALREADY_EXISTS;
@@ -30,7 +33,7 @@ public class CalendarClass implements Calendar{
 
     @Override
     public CalendarStatus addEvent(String userName, String eventName, Event.Priority priority, LocalDateTime date, Set<String> topics){
-        if (!hasAccount(userName)) return CalendarStatus.ACCOUNT_DOES_NOT_EXIST;
+        if (!hasAccount(userName)) return CalendarStatus.NO_ACCOUNT;
         User user = accounts.get(userName);
         Event event = new EventClass(eventName, user, priority, date, topics);
         return user.promoteEvent(event);
@@ -39,5 +42,12 @@ public class CalendarClass implements Calendar{
     @Override
     public Iterator<User> listAccounts() {
         return accounts.values().iterator();
+    }
+
+    @Override
+    public CalendarResponse<Iterator<Event>> userEvents(String userName) {
+        User user = accounts.get(userName);
+        if (user == null) return new CalendarResponse<>(CalendarStatus.NO_ACCOUNT);
+        return new CalendarResponse<>(user.getEvents());
     }
 }
