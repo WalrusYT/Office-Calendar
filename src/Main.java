@@ -38,6 +38,7 @@ public class Main {
             case Commands.ACCOUNTS -> listAccounts(calendar);
             case Commands.CREATE -> create(calendar, in);
             case Commands.EVENTS -> events(calendar, in);
+            case Commands.INVITE -> invite(calendar, in);
             case Commands.EXIT -> System.out.println(Feedback.BYE);
             default -> System.out.printf(Feedback.UNKNOWN_COMMAND, command.toUpperCase());
         }
@@ -102,6 +103,28 @@ public class Main {
         }
     }
 
+    private static void invite(Calendar calendar, Scanner in) {
+        String invitee = in.nextLine().trim(), promoter = in.next(), eventName = in.next();
+        Iterator<Event> cancelledEvents;
+        try {
+            cancelledEvents = calendar.inviteToEvent(invitee, promoter, eventName);
+        } catch (CalendarException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
+        if (cancelledEvents == null) {
+            System.out.printf(Feedback.INVITED, invitee);
+            return;
+        }
+        System.out.printf(Feedback.ACCEPTED, invitee);
+        while (cancelledEvents.hasNext()) {
+            Event event = cancelledEvents.next();
+            if (event.getPromoter().getName().equals(promoter))
+                System.out.printf(Feedback.REMOVED, eventName, promoter);
+            else System.out.printf(Feedback.REJECTED, eventName, invitee);
+        }
+    }
+
     /**
      * Commands which allow users to interact with this program and the game
      */
@@ -140,7 +163,11 @@ public class Main {
         EVENT_SCHEDULED = "%s is scheduled.%n",
         EVENTS = "Account %s events:%n",
         EVENT = "%s status [invited %d] [accepted %d] [rejected %d] [unanswered %d]%n",
-        NO_EVENTS = "Account %s has no events.";
+        NO_EVENTS = "Account %s has no events.",
+        INVITED = "%s was invited",
+        ACCEPTED = "%s accepted the invitation.%n",
+        REJECTED = "%s promoted by %s was rejected",
+        REMOVED = "%s promoted by %s was removed";
     }
 
 }

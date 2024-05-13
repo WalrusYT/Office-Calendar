@@ -18,6 +18,8 @@ public interface User extends Comparable<User> {
 
     Iterator<Event> addInvitation(Event event) throws CalendarException;
 
+    void removeInvitation(Event event);
+
     Event getPromotedEvent(String name);
     
     enum Type {

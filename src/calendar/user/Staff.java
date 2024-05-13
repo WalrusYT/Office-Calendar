@@ -32,6 +32,7 @@ public class Staff extends UserClass {
         List<Event> cancelledEvents = new ArrayList<>();
         for (Event e : promotedEvents.values()) {
             if (dateOverlapsEvent(event.getDate(), e.getDate())) {
+                e.remove();
                 cancelledEvents.add(e);
                 break;
             }

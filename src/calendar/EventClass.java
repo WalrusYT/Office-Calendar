@@ -39,6 +39,11 @@ public class EventClass implements Event {
     }
 
     @Override
+    public User getPromoter() {
+        return promoter;
+    }
+
+    @Override
     public LocalDateTime getDate(){
         return dateTime;
     }
@@ -64,6 +69,12 @@ public class EventClass implements Event {
     public void reject(User user) {
         invitedUsers.put(user, InvitationStatus.REJECTED);
         rejected++;
+    }
+
+    @Override
+    public void remove() {
+        for (User user : invitedUsers.keySet())
+            user.removeInvitation(this);
     }
 
     @Override

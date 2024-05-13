@@ -18,6 +18,8 @@ public interface Event {
 
     Priority getPriority();
 
+    User getPromoter();
+
     int getUnanswered();
 
     int getAccepted();
@@ -31,6 +33,8 @@ public interface Event {
     void accept(User user);
 
     void reject(User user);
+
+    void remove();
 
     enum InvitationStatus {
         REJECTED, ACCEPTED, UNANSWERED

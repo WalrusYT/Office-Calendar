@@ -36,6 +36,11 @@ public abstract class UserClass implements User {
     }
 
     @Override
+    public void removeInvitation(Event event) {
+        invitedTo.remove(event);
+    }
+
+    @Override
     public String getName() {
         return name;
     }
