@@ -47,7 +47,16 @@ public class EventClass implements Event{
         return accepted.size() + rejected.size() + unanswered.size();
     }
 
-	@Override
+    @Override
+    public EventStatus getStatus(User user) {
+        if (unanswered.contains(user)) return EventStatus.UNANSWERED;
+        if (accepted.contains(user)) return EventStatus.ACCEPTED;
+        if (rejected.contains(user)) return EventStatus.REJECTED;
+        return null; // хз хз...
+    }
+
+
+    @Override
 	public int getRejected() {
 		return rejected.size();
 	}

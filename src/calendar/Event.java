@@ -1,5 +1,7 @@
 package calendar;
 
+import calendar.user.User;
+
 import java.time.LocalDateTime;
 
 public interface Event {
@@ -12,7 +14,11 @@ public interface Event {
     int getRejected();
     int getInvited();
 
+    enum EventStatus {
+        INVITED, REJECTED, ACCEPTED, UNANSWERED
+    }
 
+    EventStatus getStatus(User user);
     enum Priority {
         MID, HIGH;
 

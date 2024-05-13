@@ -1,6 +1,7 @@
 package calendar;
 
 import calendar.Event.Priority;
+import calendar.exceptions.CalendarException;
 import calendar.user.User;
 
 import java.time.LocalDateTime;
@@ -16,6 +17,8 @@ public interface Calendar {
     CalendarStatus addEvent(String userName, String eventName, Priority Priority, LocalDateTime date, Set<String> topics);
 
     CalendarResponse<Iterator<Event>> userEvents(String userName);
+
+    CalendarResponse<Iterator<Event>> inviteToEvent(String invitee, String promoter, String eventName) throws CalendarException;
 
     record CalendarResponse<T>(T result, CalendarStatus status) {
         public CalendarResponse(T result) {

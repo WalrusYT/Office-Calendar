@@ -3,6 +3,11 @@ package calendar.user;
 import calendar.CalendarStatus;
 import calendar.Event;
 import calendar.Event.Priority;
+import calendar.exceptions.AlreadyInvitedException;
+import calendar.exceptions.CalendarException;
+import calendar.exceptions.NonExistentEventException;
+
+import java.util.Iterator;
 
 public class StaffClass extends UserClass implements Staff{
     public StaffClass(String name) {
@@ -21,5 +26,10 @@ public class StaffClass extends UserClass implements Staff{
         if (isBusy(event.getDate())) return CalendarStatus.IS_BUSY;
         events.put(event.getName(), event);
         return CalendarStatus.OK;
+    }
+    @Override
+    public Iterator<Event> inviteUser(User user, String eventName) throws CalendarException {
+        if (!events.containsKey(eventName)) throw new NonExistentEventException(user.getName(), eventName);
+
     }
 }

@@ -1,19 +1,21 @@
 package calendar;
 
+import calendar.exceptions.AlreadyHasAnEventException;
+import calendar.exceptions.AlreadyInvitedException;
+import calendar.exceptions.CalendarException;
+import calendar.exceptions.NonExistentEventException;
 import calendar.user.GuestClass;
 import calendar.user.ManagerClass;
 import calendar.user.StaffClass;
 import calendar.user.User;
 
 import java.time.LocalDateTime;
-import java.util.Iterator;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.Set;
+import java.util.*;
 
 public class CalendarClass implements Calendar {
 
     SortedMap<String, User> accounts = new TreeMap<>();
+    Map<String, Event> allEvents = new LinkedHashMap<>();
 
     private boolean hasAccount(String name){
         return accounts.containsKey(name);
@@ -36,6 +38,7 @@ public class CalendarClass implements Calendar {
         if (!hasAccount(userName)) return CalendarStatus.NO_ACCOUNT;
         User user = accounts.get(userName);
         Event event = new EventClass(eventName, user, priority, date, topics);
+        allEvents.put(eventName, event);
         return user.promoteEvent(event);
     }
 
@@ -49,5 +52,18 @@ public class CalendarClass implements Calendar {
         User user = accounts.get(userName);
         if (user == null) return new CalendarResponse<>(CalendarStatus.NO_ACCOUNT);
         return new CalendarResponse<>(user.getEvents());
+    }
+
+    @Override
+    public CalendarResponse<Iterator<Event>> inviteToEvent(String invitee, String promoter, String eventName) throws CalendarException {
+        if (!hasAccount(invitee) || !hasAccount(promoter)) {
+            return new CalendarResponse<>(CalendarStatus.NO_ACCOUNT);
+        }
+        User inviteeUser = accounts.get(invitee), promoterUser = accounts.get(promoter);
+        Event event = allEvents.get(eventName);
+        if (event == null) return null; // не написано бля шо делать
+        if (inviteeUser.isBusy(event.getDate())) throw new AlreadyHasAnEventException(invitee);
+        if (event.getStatus(inviteeUser) != null) throw new AlreadyInvitedException(invitee);
+        promoterUser.inviteUser(inviteeUser, eventName); // хз
     }
 }

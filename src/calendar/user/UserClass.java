@@ -16,7 +16,7 @@ public abstract class UserClass implements User {
         events = new LinkedHashMap<>();
     }
 
-    protected boolean isBusy(LocalDateTime dateTime) {
+    public boolean isBusy(LocalDateTime dateTime) {
         for (Event event : events.values()){
             if (event.getDate().equals(dateTime)) return true;
         }

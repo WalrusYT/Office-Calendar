@@ -96,8 +96,9 @@ public class Main {
         switch (response.status()) {
             case NO_ACCOUNT -> System.out.printf(Feedback.NO_ACCOUNT, userName);
             case OK -> {
-                System.out.printf(Feedback.EVENTS, userName);
                 Iterator<Event> events = response.result();
+                if (!events.hasNext()) { System.out.printf(Feedback.NO_EVENTS, userName); return; }
+                System.out.printf(Feedback.EVENTS, userName);
                 while (events.hasNext()) {
                     Event event = events.next();
                     System.out.printf(Feedback.EVENT, event.getName(), event.getInvited(),
@@ -152,6 +153,7 @@ public class Main {
         EVENT_SCHEDULED = "%s is scheduled%n",
         EVENTS = "Account %s events:%n",
         EVENT = "%s status [invited %d] [accepted %d] [rejected %d] [unanswered %d]%n",
+        NO_EVENTS = "Account %s has no events.",
         UNEXPECTED_ERROR = "Unexpected error.";
     }
 
