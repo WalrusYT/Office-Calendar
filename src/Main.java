@@ -1,5 +1,8 @@
 import calendar.Calendar;
 import calendar.CalendarClass;
+import calendar.exceptions.CalendarException;
+import calendar.exceptions.UnknownPriorityException;
+import calendar.exceptions.UnknownTypeException;
 import calendar.user.User;
 
 import java.time.LocalDateTime;
@@ -9,7 +12,6 @@ import java.util.Scanner;
 import java.util.Set;
 
 import calendar.Event;
-import calendar.Calendar.CalendarResponse;
 
 public class Main {
 
@@ -43,23 +45,21 @@ public class Main {
 
     private static void register(Calendar calendar, Scanner in) {
         String name = in.next(), type = in.next();
-        User.Type userType;
         try {
-            userType = User.Type.fromName(type);
-        } catch (User.Type.UnknownTypeException e) {
+            User.Type userType = User.Type.fromName(type);
+            calendar.addAccount(name, userType);
+            System.out.printf(Feedback.ACCOUNT_REGISTERED, name);
+        } catch (UnknownTypeException | CalendarException e) {
             System.out.println(e.getMessage());
-            return;
-        }
-        switch (calendar.addAccount(name, userType)) {
-            case ACCOUNT_REGISTERED -> System.out.printf(Feedback.ACCOUNT_REGISTERED, name);
-            case ACCOUNT_ALREADY_EXISTS -> System.out.printf(Feedback.ALREADY_EXISTS, name);
-            default -> System.out.println(Feedback.UNEXPECTED_ERROR);
         }
     }
 
     private static void listAccounts(Calendar calendar){
         Iterator<User> iterator = calendar.listAccounts();
-        if (!iterator.hasNext()) { System.out.println(Feedback.NO_ACCOUNTS); return; }
+        if (!iterator.hasNext()) {
+            System.out.println(Feedback.NO_ACCOUNTS);
+            return;
+        }
         System.out.println(Feedback.ACCOUNTS);
         while (iterator.hasNext()){
             User user = iterator.next();
@@ -72,40 +72,33 @@ public class Main {
         String priorityStr = in.next();
         LocalDateTime date = LocalDateTime.parse(in.nextLine().trim(), DT_FORMAT);
         Set<String> topics = Set.of(in.nextLine().split(" "));
-        Event.Priority priority;
         try {
-            priority = Event.Priority.fromName(priorityStr);
-        } catch (Event.Priority.UnknownPriorityException e) {
+            Event.Priority priority = Event.Priority.fromName(priorityStr);
+            calendar.addEvent(userName, eventName, priority, date, topics);
+            System.out.printf(Feedback.EVENT_SCHEDULED, eventName);
+        } catch (UnknownPriorityException | CalendarException e) {
             System.out.println(e.getMessage());
-            return;
-        }
-        switch (calendar.addEvent(userName, eventName, priority, date, topics)) {
-            case NO_ACCOUNT -> System.out.printf(Feedback.NO_ACCOUNT, userName);
-            case CANNOT_CREATE_ANY -> System.out.printf(Feedback.CANNOT_CREATE_ANY, userName);
-            case CANNOT_CREATE_HIGH -> System.out.printf(Feedback.CANNOT_CREATE_HIGH, userName);
-            case EVENT_EXISTS -> System.out.printf(Feedback.EVENT_EXISTS, eventName, userName);
-            case IS_BUSY -> System.out.printf(Feedback.IS_BUSY, userName);
-            case OK -> System.out.printf(Feedback.EVENT_SCHEDULED, eventName);
-            default -> System.out.println(Feedback.UNEXPECTED_ERROR);
         }
     }
 
     private static void events(Calendar calendar, Scanner in) {
         String userName = in.next();
-        CalendarResponse<Iterator<Event>> response = calendar.userEvents(userName);
-        switch (response.status()) {
-            case NO_ACCOUNT -> System.out.printf(Feedback.NO_ACCOUNT, userName);
-            case OK -> {
-                Iterator<Event> events = response.result();
-                if (!events.hasNext()) { System.out.printf(Feedback.NO_EVENTS, userName); return; }
-                System.out.printf(Feedback.EVENTS, userName);
-                while (events.hasNext()) {
-                    Event event = events.next();
-                    System.out.printf(Feedback.EVENT, event.getName(), event.getInvited(),
-                        event.getAccepted(), event.getRejected(), event.getUnanswered());
-                }
-            }
-            default -> System.out.println(Feedback.UNEXPECTED_ERROR);
+        Iterator<Event> events;
+        try {
+            events = calendar.userEvents(userName);
+        } catch (CalendarException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
+        if (!events.hasNext()) {
+            System.out.printf(Feedback.NO_EVENTS, userName);
+            return;
+        }
+        System.out.printf(Feedback.EVENTS, userName);
+        while (events.hasNext()) {
+            Event event = events.next();
+            System.out.printf(Feedback.EVENT, event.getName(), event.getInvited(),
+                    event.getAccepted(), event.getRejected(), event.getUnanswered());
         }
     }
 
@@ -135,26 +128,19 @@ public class Main {
         %s - shows detailed information of an event
         %s - shows all events that cover a list of topics
         %s - shows the available commands
-        %s - terminates the execution of the program
-        """, Commands.REGISTER, Commands.ACCOUNTS, Commands.CREATE, Commands.EVENTS,
+        %s - terminates the execution of the program""",
+                Commands.REGISTER, Commands.ACCOUNTS, Commands.CREATE, Commands.EVENTS,
                 Commands.INVITE, Commands.RESPONSE, Commands.EVENT, Commands.TOPICS,
                 Commands.HELP, Commands.EXIT),
         BYE = "Bye!",
         UNKNOWN_COMMAND = "Unknown command %s. Type help to see available commands.%n",
         ACCOUNT_REGISTERED = "%s was registered.%n",
-        ALREADY_EXISTS = "%s already exists.%n",
         NO_ACCOUNTS = "No accounts registered.",
         ACCOUNTS = "All accounts:",
-        NO_ACCOUNT = "Account %s does not exist.%n",
-        CANNOT_CREATE_ANY = "Guest account %s cannot create events.%n",
-        CANNOT_CREATE_HIGH = "Account %s cannot create high priority events.%n",
-        EVENT_EXISTS = "%s already exists in account %s%n",
-        IS_BUSY = "Account %s is busy.%n",
-        EVENT_SCHEDULED = "%s is scheduled%n",
+        EVENT_SCHEDULED = "%s is scheduled.%n",
         EVENTS = "Account %s events:%n",
         EVENT = "%s status [invited %d] [accepted %d] [rejected %d] [unanswered %d]%n",
-        NO_EVENTS = "Account %s has no events.",
-        UNEXPECTED_ERROR = "Unexpected error.";
+        NO_EVENTS = "Account %s has no events.";
     }
 
 }

@@ -1,12 +1,10 @@
 package calendar.user;
 
-import java.time.LocalDateTime;
 import java.util.Iterator;
 
-import calendar.CalendarStatus;
 import calendar.Event;
-import calendar.exceptions.AlreadyInvitedException;
 import calendar.exceptions.CalendarException;
+import calendar.exceptions.UnknownTypeException;
 
 public interface User extends Comparable<User> {
 
@@ -14,17 +12,17 @@ public interface User extends Comparable<User> {
 
     Type getType();
 
-    CalendarStatus promoteEvent(Event event);
-    
-    Iterator<Event> getEvents();
+    void promoteEvent(Event event) throws CalendarException;
 
-    Iterator<Event> inviteUser(User user, String eventName) throws CalendarException;
+    Iterator<Event> getPromotedEvents();
 
-    boolean isBusy(LocalDateTime dateTime);
+    Iterator<Event> addInvitation(Event event) throws CalendarException;
+
+    Event getPromotedEvent(String name);
     
     enum Type {
         STAFF, MANAGER, GUEST;
-        public static Type fromName(String type) throws UnknownTypeException{
+        public static Type fromName(String type) throws UnknownTypeException {
             switch (type.toLowerCase()) {
                 case "manager" -> { return MANAGER; }
                 case "staff" -> { return STAFF; }
@@ -32,14 +30,5 @@ public interface User extends Comparable<User> {
             }
             throw new UnknownTypeException();
         }
-        public static class UnknownTypeException extends Exception {
-            private final static String MSG = "Unknown account type.";
-            public UnknownTypeException() {
-                super(MSG);
-            }
-        }
-    }
-    enum CreateEventResponse {
-        CANNOT_CREATE_ANY, CANNOT_CREATE_HIGH, EVENT_EXISTS, IS_BUSY, OK
     }
 }

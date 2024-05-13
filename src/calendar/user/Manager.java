@@ -1,4 +1,12 @@
 package calendar.user;
 
-public interface Manager extends User{
+public class Manager extends UserClass {
+    public Manager(String name) {
+        super(name);
+    }
+
+    @Override
+    public Type getType() {
+        return Type.MANAGER;
+    }
 }

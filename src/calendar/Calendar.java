@@ -10,23 +10,13 @@ import java.util.Set;
 
 public interface Calendar {
 
-    CalendarStatus addAccount(String name, User.Type type);
+    void addAccount(String name, User.Type type) throws CalendarException;
 
     Iterator<User> listAccounts();
 
-    CalendarStatus addEvent(String userName, String eventName, Priority Priority, LocalDateTime date, Set<String> topics);
+    void addEvent(String userName, String eventName, Priority Priority, LocalDateTime date, Set<String> topics) throws CalendarException;
 
-    CalendarResponse<Iterator<Event>> userEvents(String userName);
+    Iterator<Event> userEvents(String userName) throws CalendarException;
 
-    CalendarResponse<Iterator<Event>> inviteToEvent(String invitee, String promoter, String eventName) throws CalendarException;
-
-    record CalendarResponse<T>(T result, CalendarStatus status) {
-        public CalendarResponse(T result) {
-            this(result, CalendarStatus.OK);
-        }
-
-        public CalendarResponse(CalendarStatus status) {
-            this(null, status);
-        }
-    }
+    Iterator<Event> inviteToEvent(String invitee, String promoter, String eventName) throws CalendarException;
 }

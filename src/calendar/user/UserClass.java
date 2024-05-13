@@ -1,26 +1,38 @@
 package calendar.user;
 
 import calendar.Event;
+import calendar.Event.InvitationStatus;
+import calendar.exceptions.*;
 
 import java.time.LocalDateTime;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public abstract class UserClass implements User {
     protected final String name;
-    protected final Map<String, Event> events;
+    protected final Map<String, Event> promotedEvents;
+    protected final Map<Event, InvitationStatus> invitedTo;
 
     public UserClass(String name) {
         this.name = name;
-        events = new LinkedHashMap<>();
+        promotedEvents = new LinkedHashMap<>();
+        invitedTo = new LinkedHashMap<>();
     }
 
-    public boolean isBusy(LocalDateTime dateTime) {
-        for (Event event : events.values()){
-            if (event.getDate().equals(dateTime)) return true;
+    protected boolean isBusy(LocalDateTime dateTime) {
+        for (Event event : promotedEvents.values())
+            if (dateOverlapsEvent(dateTime, event.getDate())) return true;
+        for (Map.Entry<Event, InvitationStatus> entry : invitedTo.entrySet()) {
+            Event event = entry.getKey();
+            InvitationStatus invitationStatus = entry.getValue();
+            if (invitationStatus != InvitationStatus.ACCEPTED) continue;
+            if (dateOverlapsEvent(dateTime, event.getDate())) return true;
         }
         return false;
+    }
+
+    protected boolean dateOverlapsEvent(LocalDateTime date, LocalDateTime eventDate) {
+        LocalDateTime eventEnd = eventDate.plus(Event.EVENT_DURATION);
+        return date.isAfter(eventDate) && date.isBefore(eventEnd);
     }
 
     @Override
@@ -34,7 +46,40 @@ public abstract class UserClass implements User {
     }
 
     @Override
-    public Iterator<Event> getEvents() {
-        return events.values().iterator();
+    public Iterator<Event> getPromotedEvents() {
+        return promotedEvents.values().iterator();
+    }
+
+    @Override
+    public void promoteEvent(Event event) throws CalendarException {
+        if (promotedEvents.containsKey(event.getName()))
+            throw new EventAlreadyExistsException(event.getName(), this.name);
+        if (this.isBusy(event.getDate())) throw new UserBusyException(this.name);
+        promotedEvents.put(event.getName(), event);
+    }
+
+    @Override
+    public Event getPromotedEvent(String name) {
+        return promotedEvents.get(name);
+    }
+
+    @Override
+    public Iterator<Event> addInvitation(Event event) throws CalendarException {
+        if (invitedTo.containsKey(event)) throw new AlreadyInvitedException(this.name);
+        if (this.isBusy(event.getDate())) throw new AlreadyHasAnEventException(this.name);
+        event.invite(this);
+        return null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserClass userClass)) return false;
+        return Objects.equals(name, userClass.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(name);
     }
 }
