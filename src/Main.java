@@ -119,9 +119,9 @@ public class Main {
         System.out.printf(Feedback.ACCEPTED, invitee);
         while (cancelledEvents.hasNext()) {
             Event event = cancelledEvents.next();
-            if (event.getPromoter().getName().equals(promoter))
-                System.out.printf(Feedback.REMOVED, eventName, promoter);
-            else System.out.printf(Feedback.REJECTED, eventName, invitee);
+            boolean inviteePromoted = event.getPromoter().getName().equals(invitee);
+            System.out.printf(inviteePromoted ? Feedback.REMOVED : Feedback.REJECTED,
+                event.getName(), event.getPromoter().getName());
         }
     }
 

@@ -1,8 +1,10 @@
 package calendar;
 
+import calendar.exceptions.CalendarException;
 import calendar.user.User;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -54,21 +56,22 @@ public class EventClass implements Event {
     }
 
     @Override
-    public void invite(User user) {
+    public Iterator<Event> invite(User user) throws CalendarException {
         invitedUsers.put(user, InvitationStatus.UNANSWERED);
         unanswered++;
+        return user.addInvitation(this);
     }
 
     @Override
-    public void accept(User user) {
-        invitedUsers.put(user, InvitationStatus.ACCEPTED);
-        accepted++;
-    }
-
-    @Override
-    public void reject(User user) {
-        invitedUsers.put(user, InvitationStatus.REJECTED);
-        rejected++;
+    public void respond(User user, InvitationStatus status) throws CalendarException {
+        if (!invitedUsers.containsKey(user)) throw new CalendarException("");
+        switch (status) {
+            case ACCEPTED -> accepted++;
+            case REJECTED -> rejected++;
+            default -> throw new CalendarException("");
+        }
+        unanswered--;
+        invitedUsers.put(user, status);
     }
 
     @Override

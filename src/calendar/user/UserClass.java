@@ -4,6 +4,7 @@ import calendar.Event;
 import calendar.Event.InvitationStatus;
 import calendar.exceptions.*;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -31,8 +32,8 @@ public abstract class UserClass implements User {
     }
 
     protected boolean dateOverlapsEvent(LocalDateTime date, LocalDateTime eventDate) {
-        LocalDateTime eventEnd = eventDate.plus(Event.EVENT_DURATION);
-        return date.isAfter(eventDate) && date.isBefore(eventEnd);
+        Duration diff = Duration.between(date, eventDate).abs();
+        return diff.minus(Event.EVENT_DURATION).isNegative();
     }
 
     @Override
@@ -72,7 +73,7 @@ public abstract class UserClass implements User {
     public Iterator<Event> addInvitation(Event event) throws CalendarException {
         if (invitedTo.containsKey(event)) throw new AlreadyInvitedException(this.name);
         if (this.isBusy(event.getDate())) throw new AlreadyHasAnEventException(this.name);
-        event.invite(this);
+        invitedTo.put(event, Event.InvitationStatus.UNANSWERED);
         return null;
     }
 

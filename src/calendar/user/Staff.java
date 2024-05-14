@@ -5,7 +5,6 @@ import calendar.Event.Priority;
 import calendar.Event.InvitationStatus;
 import calendar.exceptions.*;
 
-import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -31,6 +30,19 @@ public class Staff extends UserClass {
     public Iterator<Event> addInvitation(Event event) throws CalendarException {
         if (event.getPriority() != Priority.HIGH) return super.addInvitation(event);
         List<Event> cancelledEvents = new ArrayList<>();
+        for (Map.Entry<Event, InvitationStatus> entry : invitedTo.entrySet()) {
+            Event e = entry.getKey();
+            InvitationStatus status = entry.getValue();
+            if (status == InvitationStatus.REJECTED) continue;
+            if (dateOverlapsEvent(event.getDate(), e.getDate())) {
+                // они почему-то не написали, что если стафф уже посещает
+                // высокоприоритетное событие, то он не должен принимать новое
+                if (e.getPriority() == Priority.HIGH)
+                    throw new AlreadyInvitedException(name);
+                invitedTo.put(e, Event.InvitationStatus.REJECTED);
+                cancelledEvents.add(e);
+            }
+        }
         for (Event e : promotedEvents.values()) { // цикл по пустой коллекции
             if (dateOverlapsEvent(event.getDate(), e.getDate())) {
                 e.remove();
@@ -38,14 +50,8 @@ public class Staff extends UserClass {
                 break;
             }
         }
-        // не добавляем ивент ??
-        for (Map.Entry<Event, InvitationStatus> entry : invitedTo.entrySet()) {
-            Event e = entry.getKey();
-            InvitationStatus status = entry.getValue();
-            if (status == InvitationStatus.REJECTED) continue;
-            if (dateOverlapsEvent(event.getDate(), e.getDate()))
-                cancelledEvents.add(e);
-        }
+        event.respond(this, Event.InvitationStatus.ACCEPTED);
+        invitedTo.put(event, Event.InvitationStatus.ACCEPTED);
         return cancelledEvents.iterator();
     }
 }

@@ -1,16 +1,17 @@
 package calendar;
 
+import calendar.exceptions.CalendarException;
 import calendar.exceptions.UnknownPriorityException;
 import calendar.user.User;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAmount;
+import java.util.Iterator;
 
 public interface Event {
 
-    TemporalAmount EVENT_DURATION = Duration.of(1, ChronoUnit.HOURS);
+    Duration EVENT_DURATION = Duration.of(1, ChronoUnit.HOURS);
 
     String getName();
 
@@ -28,11 +29,9 @@ public interface Event {
 
     int getInvited();
 
-    void invite(User user);
+    Iterator<Event> invite(User user) throws CalendarException;
 
-    void accept(User user);
-
-    void reject(User user);
+    void respond(User user, InvitationStatus status) throws CalendarException;
 
     void remove();
 
