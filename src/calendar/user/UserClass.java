@@ -71,8 +71,8 @@ public abstract class UserClass implements User {
 
     @Override
     public Iterator<Event> addInvitation(Event event) throws CalendarException {
-        if (invitedTo.containsKey(event)) throw new AlreadyInvitedException(this.name);
         if (this.isBusy(event.getDate())) throw new AlreadyHasAnEventException(this.name);
+        if (invitedTo.containsKey(event)) throw new AlreadyInvitedException(this.name);
         invitedTo.put(event, Event.InvitationStatus.UNANSWERED);
         return null;
     }

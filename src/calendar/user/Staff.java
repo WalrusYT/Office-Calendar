@@ -38,12 +38,12 @@ public class Staff extends UserClass {
                 // они почему-то не написали, что если стафф уже посещает
                 // высокоприоритетное событие, то он не должен принимать новое
                 if (e.getPriority() == Priority.HIGH)
-                    throw new AlreadyInvitedException(name);
+                    throw new AlreadyHasAnEventException(name);
                 invitedTo.put(e, Event.InvitationStatus.REJECTED);
                 cancelledEvents.add(e);
             }
         }
-        for (Event e : promotedEvents.values()) { // цикл по пустой коллекции
+        for (Event e : promotedEvents.values()) {
             if (dateOverlapsEvent(event.getDate(), e.getDate())) {
                 e.remove();
                 cancelledEvents.add(e);
