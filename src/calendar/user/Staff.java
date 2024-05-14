@@ -5,6 +5,7 @@ import calendar.Event.Priority;
 import calendar.Event.InvitationStatus;
 import calendar.exceptions.*;
 
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -30,13 +31,14 @@ public class Staff extends UserClass {
     public Iterator<Event> addInvitation(Event event) throws CalendarException {
         if (event.getPriority() != Priority.HIGH) return super.addInvitation(event);
         List<Event> cancelledEvents = new ArrayList<>();
-        for (Event e : promotedEvents.values()) {
+        for (Event e : promotedEvents.values()) { // цикл по пустой коллекции
             if (dateOverlapsEvent(event.getDate(), e.getDate())) {
                 e.remove();
                 cancelledEvents.add(e);
                 break;
             }
         }
+        // не добавляем ивент ??
         for (Map.Entry<Event, InvitationStatus> entry : invitedTo.entrySet()) {
             Event e = entry.getKey();
             InvitationStatus status = entry.getValue();

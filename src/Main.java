@@ -104,7 +104,7 @@ public class Main {
     }
 
     private static void invite(Calendar calendar, Scanner in) {
-        String invitee = in.nextLine().trim(), promoter = in.next(), eventName = in.next();
+        String invitee = in.nextLine().trim(), promoter = in.next(), eventName = in.nextLine().trim();
         Iterator<Event> cancelledEvents;
         try {
             cancelledEvents = calendar.inviteToEvent(invitee, promoter, eventName);
@@ -163,11 +163,11 @@ public class Main {
         EVENT_SCHEDULED = "%s is scheduled.%n",
         EVENTS = "Account %s events:%n",
         EVENT = "%s status [invited %d] [accepted %d] [rejected %d] [unanswered %d]%n",
-        NO_EVENTS = "Account %s has no events.",
-        INVITED = "%s was invited",
+        NO_EVENTS = "Account %s has no events.%n",
+        INVITED = "%s was invited%n",
         ACCEPTED = "%s accepted the invitation.%n",
-        REJECTED = "%s promoted by %s was rejected",
-        REMOVED = "%s promoted by %s was removed";
+        REJECTED = "%s promoted by %s was rejected%n",
+        REMOVED = "%s promoted by %s was removed%n";
     }
 
 }

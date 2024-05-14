@@ -50,7 +50,7 @@ public class CalendarClass implements Calendar {
         if (inviteeUser == null) throw new UserNotFoundException(invitee);
         if (promoterUser == null) throw new UserNotFoundException(promoter);
         Event event = promoterUser.getPromotedEvent(eventName);
-        if (event == null) throw new EventNotFoundException(eventName, promoterUser.getName());
+        if (event == null) throw new EventNotFoundException(promoterUser.getName(), eventName);
         return inviteeUser.addInvitation(event);
     }
 }
