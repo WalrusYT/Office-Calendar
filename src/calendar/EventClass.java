@@ -1,6 +1,8 @@
 package calendar;
 
+import calendar.exceptions.AlreadyAnsweredException;
 import calendar.exceptions.CalendarException;
+import calendar.exceptions.UserNotInvitedException;
 import calendar.user.User;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -64,7 +66,7 @@ public class EventClass implements Event {
 
     @Override
     public void respond(User user, InvitationStatus status) throws CalendarException {
-        if (!invitedUsers.containsKey(user)) throw new CalendarException("");
+        if (!invitedUsers.containsKey(user)) throw new UserNotInvitedException(user.getName());
         switch (status) {
             case ACCEPTED -> accepted++;
             case REJECTED -> rejected++;
@@ -94,6 +96,21 @@ public class EventClass implements Event {
 	public int getUnanswered() {
 		return unanswered;
 	}
+
+    @Override
+    public Iterator<Event> response(User user, Calendar.Response responseType) throws CalendarException {
+        if (!invitedUsers.containsKey(user)) throw new UserNotInvitedException(user.getName());
+        if (invitedUsers.get(user) != InvitationStatus.UNANSWERED) throw new AlreadyAnsweredException(user.getName());
+        switch (responseType) {
+            case ACCEPT -> accepted++;
+            case REJECT -> rejected++;
+            default -> throw new CalendarException("");
+        }
+        unanswered--;
+        invitedUsers.put(user, InvitationStatus.ACCEPTED);
+        return user.response(this);
+    }
+
 
     @Override
     public boolean equals(Object o) {

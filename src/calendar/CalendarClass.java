@@ -53,4 +53,14 @@ public class CalendarClass implements Calendar {
         if (event == null) throw new EventNotFoundException(promoterUser.getName(), eventName);
         return event.invite(inviteeUser);
     }
+
+    @Override
+    public Iterator<Event> response(String invitee, String promoter, String eventName, Response responseType) throws CalendarException {
+        User inviteeUser = accounts.get(invitee), promoterUser = accounts.get(promoter);
+        if (inviteeUser == null) throw new UserNotFoundException(invitee);
+        if (promoterUser == null) throw new UserNotFoundException(promoter);
+        Event event = promoterUser.getPromotedEvent(eventName);
+        if (event == null) throw new EventNotFoundException(promoterUser.getName(), eventName);
+        return event.response(inviteeUser, responseType);
+    }
 }

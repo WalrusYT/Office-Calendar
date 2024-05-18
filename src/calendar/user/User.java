@@ -17,6 +17,7 @@ public interface User extends Comparable<User> {
     Iterator<Event> getPromotedEvents();
 
     Iterator<Event> addInvitation(Event event) throws CalendarException;
+    Iterator<Event> response(Event event);
 
     void removeInvitation(Event event);
 

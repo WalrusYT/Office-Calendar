@@ -1,6 +1,7 @@
 import calendar.Calendar;
 import calendar.CalendarClass;
 import calendar.exceptions.CalendarException;
+import calendar.exceptions.UnknownEventResponseException;
 import calendar.exceptions.UnknownPriorityException;
 import calendar.exceptions.UnknownTypeException;
 import calendar.user.User;
@@ -39,6 +40,7 @@ public class Main {
             case Commands.CREATE -> create(calendar, in);
             case Commands.EVENTS -> events(calendar, in);
             case Commands.INVITE -> invite(calendar, in);
+            case Commands.RESPONSE -> response(calendar, in);
             case Commands.EXIT -> System.out.println(Feedback.BYE);
             default -> System.out.printf(Feedback.UNKNOWN_COMMAND, command.toUpperCase());
         }
@@ -125,6 +127,29 @@ public class Main {
         }
     }
 
+    private static void response(Calendar calendar, Scanner in) {
+        String invitee = in.nextLine().trim(), promoter = in.next(),
+                eventName = in.nextLine().trim(), responseStr = in.next();
+        Iterator<Event> cancelledEvents;
+        Calendar.Response responseType = null;
+        try {
+            responseType = Calendar.Response.fromName(responseStr);
+        } catch (UnknownEventResponseException e) {
+            System.out.println(e.getMessage());
+        }
+        try {
+            cancelledEvents = calendar.response(invitee, promoter, eventName, responseType);
+        } catch (CalendarException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
+        System.out.printf(Feedback.REPLIED, invitee, responseStr.toLowerCase());
+        while (cancelledEvents.hasNext()) {
+            Event event = cancelledEvents.next();
+            System.out.printf(Feedback.REJECTED, event.getName(), event.getPromoter().getName());
+        }
+    }
+
     /**
      * Commands which allow users to interact with this program and the game
      */
@@ -167,7 +192,8 @@ public class Main {
         INVITED = "%s was invited%n",
         ACCEPTED = "%s accepted the invitation.%n",
         REJECTED = "%s promoted by %s was rejected%n",
-        REMOVED = "%s promoted by %s was removed%n";
+        REMOVED = "%s promoted by %s was removed%n",
+        REPLIED = "Accounts %s has replied %s to the invitation.%n";
     }
 
 }

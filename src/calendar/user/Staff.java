@@ -35,8 +35,6 @@ public class Staff extends UserClass {
             InvitationStatus status = entry.getValue();
             if (status == InvitationStatus.REJECTED) continue;
             if (dateOverlapsEvent(event.getDate(), e.getDate())) {
-                // они почему-то не написали, что если стафф уже посещает
-                // высокоприоритетное событие, то он не должен принимать новое
                 if (e.getPriority() == Priority.HIGH)
                     throw new AlreadyHasAnEventException(name);
                 invitedTo.put(e, Event.InvitationStatus.REJECTED);

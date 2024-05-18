@@ -35,6 +35,8 @@ public interface Event {
 
     void remove();
 
+    public Iterator<Event> response(User user, Calendar.Response responseType) throws CalendarException;
+
     enum InvitationStatus {
         REJECTED, ACCEPTED, UNANSWERED
     }

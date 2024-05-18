@@ -78,6 +78,30 @@ public abstract class UserClass implements User {
     }
 
     @Override
+    public Iterator<Event> response(Event event) {
+        List<Event> cancelledEvents = new ArrayList<>();
+        for (Map.Entry<Event, InvitationStatus> entry : invitedTo.entrySet()) {
+            Event e = entry.getKey();
+            InvitationStatus status = entry.getValue();
+            //if (status == InvitationStatus.REJECTED) continue;
+            // нужно ли выводить...
+            if (dateOverlapsEvent(event.getDate(), e.getDate())) {
+                invitedTo.put(e, InvitationStatus.REJECTED);
+                cancelledEvents.add(e);
+            }
+        }
+//        for (Event e : promotedEvents.values()) {
+//            if (dateOverlapsEvent(event.getDate(), e.getDate())) {
+//                e.remove();
+//                cancelledEvents.add(e);
+//                break;
+//            }
+//        }
+        invitedTo.put(event, Event.InvitationStatus.ACCEPTED);
+        return cancelledEvents.iterator();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof UserClass userClass)) return false;
