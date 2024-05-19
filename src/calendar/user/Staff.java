@@ -38,6 +38,7 @@ public class Staff extends UserClass {
                 if (e.getPriority() == Priority.HIGH)
                     throw new AlreadyHasAnEventException(name);
                 invitedTo.put(e, Event.InvitationStatus.REJECTED);
+                e.respond(this, Event.InvitationStatus.REJECTED);
                 cancelledEvents.add(e);
             }
         }

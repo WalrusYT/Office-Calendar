@@ -3,6 +3,7 @@ package calendar.user;
 import calendar.Event;
 import calendar.Event.InvitationStatus;
 import calendar.exceptions.*;
+import calendar.Calendar;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -78,25 +79,19 @@ public abstract class UserClass implements User {
     }
 
     @Override
-    public Iterator<Event> response(Event event) {
+    public Iterator<Event> response(Event event, Calendar.Response responseType) {
+        if (responseType == Calendar.Response.REJECT) {
+            invitedTo.put(event, InvitationStatus.REJECTED);
+            return null;
+        }
         List<Event> cancelledEvents = new ArrayList<>();
         for (Map.Entry<Event, InvitationStatus> entry : invitedTo.entrySet()) {
             Event e = entry.getKey();
-            InvitationStatus status = entry.getValue();
-            //if (status == InvitationStatus.REJECTED) continue;
-            // нужно ли выводить...
             if (dateOverlapsEvent(event.getDate(), e.getDate())) {
                 invitedTo.put(e, InvitationStatus.REJECTED);
                 cancelledEvents.add(e);
             }
         }
-//        for (Event e : promotedEvents.values()) {
-//            if (dateOverlapsEvent(event.getDate(), e.getDate())) {
-//                e.remove();
-//                cancelledEvents.add(e);
-//                break;
-//            }
-//        }
         invitedTo.put(event, Event.InvitationStatus.ACCEPTED);
         return cancelledEvents.iterator();
     }

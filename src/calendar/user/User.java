@@ -2,6 +2,7 @@ package calendar.user;
 
 import java.util.Iterator;
 
+import calendar.Calendar;
 import calendar.Event;
 import calendar.exceptions.CalendarException;
 import calendar.exceptions.UnknownTypeException;
@@ -17,7 +18,7 @@ public interface User extends Comparable<User> {
     Iterator<Event> getPromotedEvents();
 
     Iterator<Event> addInvitation(Event event) throws CalendarException;
-    Iterator<Event> response(Event event);
+    Iterator<Event> response(Event event, Calendar.Response responseType);
 
     void removeInvitation(Event event);
 

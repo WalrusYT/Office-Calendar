@@ -35,10 +35,17 @@ public interface Event {
 
     void remove();
 
-    public Iterator<Event> response(User user, Calendar.Response responseType) throws CalendarException;
+    Iterator<Event> response(User user, Calendar.Response responseType) throws CalendarException;
 
     enum InvitationStatus {
-        REJECTED, ACCEPTED, UNANSWERED
+        REJECTED, ACCEPTED, UNANSWERED;
+        public static InvitationStatus fromResponse (Calendar.Response response) {
+            switch (response){
+                case ACCEPT -> { return ACCEPTED; }
+                case REJECT -> { return REJECTED; }
+                default -> { return null; }
+            }
+        }
     }
 
     enum Priority {

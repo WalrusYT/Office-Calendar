@@ -99,16 +99,9 @@ public class EventClass implements Event {
 
     @Override
     public Iterator<Event> response(User user, Calendar.Response responseType) throws CalendarException {
-        if (!invitedUsers.containsKey(user)) throw new UserNotInvitedException(user.getName());
         if (invitedUsers.get(user) != InvitationStatus.UNANSWERED) throw new AlreadyAnsweredException(user.getName());
-        switch (responseType) {
-            case ACCEPT -> accepted++;
-            case REJECT -> rejected++;
-            default -> throw new CalendarException("");
-        }
-        unanswered--;
-        invitedUsers.put(user, InvitationStatus.ACCEPTED);
-        return user.response(this);
+        respond(user, InvitationStatus.fromResponse(responseType));
+        return user.response(this, responseType);
     }
 
 
