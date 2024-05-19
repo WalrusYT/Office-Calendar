@@ -3,15 +3,15 @@ package calendar;
 import calendar.Event.Priority;
 import calendar.exceptions.CalendarException;
 import calendar.exceptions.UnknownEventResponseException;
-import calendar.exceptions.UnknownTypeException;
 import calendar.user.User;
 
 import java.time.LocalDateTime;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 public interface Calendar {
-
+    Event getEvent(String promoter, String eventName);
     void addAccount(String name, User.Type type) throws CalendarException;
 
     Iterator<User> listAccounts();
@@ -23,6 +23,8 @@ public interface Calendar {
     Iterator<Event> inviteToEvent(String invitee, String promoter, String eventName) throws CalendarException;
 
     Iterator<Event> response(String invitee, String promoter, String eventName, Response responseType) throws CalendarException;
+
+    Iterator<Map.Entry<User, Event.InvitationStatus>> event(String promoter, String eventName) throws CalendarException;
 
     enum Response {
         ACCEPT, REJECT;

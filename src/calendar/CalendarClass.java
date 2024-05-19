@@ -14,6 +14,12 @@ public class CalendarClass implements Calendar {
     Map<String, User> accounts = new TreeMap<>();
 
     @Override
+    public Event getEvent(String promoter, String eventName) {
+        User user = accounts.get(promoter);
+        return user.getPromotedEvent(eventName);
+    }
+
+    @Override
     public void addAccount(String name, User.Type type) throws CalendarException {
         if (accounts.containsKey(name)) throw new UserAlreadyExistsException(name);
         User user = switch (type) {
@@ -63,4 +69,15 @@ public class CalendarClass implements Calendar {
         if (event == null) throw new EventNotFoundException(promoterUser.getName(), eventName);
         return event.response(inviteeUser, responseType);
     }
+
+    @Override
+    public Iterator<Map.Entry<User, Event.InvitationStatus>> event(String promoter, String eventName) throws CalendarException {
+        User user = accounts.get(promoter);
+        if (user == null) throw new UserNotFoundException(promoter);
+        Event event = user.getPromotedEvent(eventName);
+        if (event == null) throw new EventNotFoundException(user.getName(), eventName);
+        return event.getInvitedUsers();
+    }
+
+
 }

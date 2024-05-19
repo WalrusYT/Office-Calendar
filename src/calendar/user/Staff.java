@@ -34,7 +34,7 @@ public class Staff extends UserClass {
             Event e = entry.getKey();
             InvitationStatus status = entry.getValue();
             if (status == InvitationStatus.REJECTED) continue;
-            if (dateOverlapsEvent(event.getDate(), e.getDate())) {
+            if (dateOverlapsEvent(event.getDate(), e.getDate()) && event != e) {
                 if (e.getPriority() == Priority.HIGH)
                     throw new AlreadyHasAnEventException(name);
                 invitedTo.put(e, Event.InvitationStatus.REJECTED);

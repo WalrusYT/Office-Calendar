@@ -104,6 +104,11 @@ public class EventClass implements Event {
         return user.response(this, responseType);
     }
 
+    @Override
+    public Iterator<Map.Entry<User, InvitationStatus>> getInvitedUsers() {
+        return invitedUsers.entrySet().iterator();
+    }
+
 
     @Override
     public boolean equals(Object o) {

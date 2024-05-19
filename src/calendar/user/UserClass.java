@@ -87,7 +87,7 @@ public abstract class UserClass implements User {
         List<Event> cancelledEvents = new ArrayList<>();
         for (Map.Entry<Event, InvitationStatus> entry : invitedTo.entrySet()) {
             Event e = entry.getKey();
-            if (dateOverlapsEvent(event.getDate(), e.getDate())) {
+            if (dateOverlapsEvent(event.getDate(), e.getDate()) && event != e) {
                 invitedTo.put(e, InvitationStatus.REJECTED);
                 cancelledEvents.add(e);
             }

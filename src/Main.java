@@ -9,6 +9,7 @@ import calendar.user.User;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -41,6 +42,7 @@ public class Main {
             case Commands.EVENTS -> events(calendar, in);
             case Commands.INVITE -> invite(calendar, in);
             case Commands.RESPONSE -> response(calendar, in);
+            case Commands.EVENT -> event(calendar, in);
             case Commands.EXIT -> System.out.println(Feedback.BYE);
             default -> System.out.printf(Feedback.UNKNOWN_COMMAND, command.toUpperCase());
         }
@@ -130,12 +132,13 @@ public class Main {
     private static void response(Calendar calendar, Scanner in) {
         String invitee = in.nextLine().trim(), promoter = in.next(),
                 eventName = in.nextLine().trim(), responseStr = in.next();
-        Iterator<Event> cancelledEvents;
+        Iterator<Event> cancelledEvents = null;
         Calendar.Response responseType = null;
         try {
             responseType = Calendar.Response.fromName(responseStr);
         } catch (UnknownEventResponseException e) {
             System.out.println(e.getMessage());
+            return;
         }
         try {
             cancelledEvents = calendar.response(invitee, promoter, eventName, responseType);
@@ -144,9 +147,28 @@ public class Main {
             return;
         }
         System.out.printf(Feedback.REPLIED, invitee, responseStr.toLowerCase());
+        if (cancelledEvents == null) return;
         while (cancelledEvents.hasNext()) {
             Event event = cancelledEvents.next();
             System.out.printf(Feedback.REJECTED, event.getName(), event.getPromoter().getName());
+        }
+    }
+
+    private static void event(Calendar calendar, Scanner in) {
+        String promoter = in.next(),  eventName = in.nextLine().trim();
+        Iterator<Map.Entry<User, Event.InvitationStatus>> users;
+        try {
+            users = calendar.event(promoter, eventName);
+        } catch (CalendarException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
+        Event event = calendar.getEvent(promoter, eventName);
+        String date = event.getDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH"));
+        System.out.printf("%s occurs on %sh%n", event.getName(), date);
+        while (users.hasNext()) {
+            Map.Entry<User, Event.InvitationStatus> entry = users.next();
+            System.out.printf("%s [%s]%n", entry.getKey().getName(), entry.getValue().name().toLowerCase());
         }
     }
 

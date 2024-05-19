@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Iterator;
+import java.util.Map;
 
 public interface Event {
 
@@ -36,6 +37,8 @@ public interface Event {
     void remove();
 
     Iterator<Event> response(User user, Calendar.Response responseType) throws CalendarException;
+
+    Iterator<Map.Entry<User, InvitationStatus>> getInvitedUsers();
 
     enum InvitationStatus {
         REJECTED, ACCEPTED, UNANSWERED;
