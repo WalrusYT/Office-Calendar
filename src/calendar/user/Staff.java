@@ -27,7 +27,7 @@ public class Staff extends UserClass {
     }
 
     @Override
-    public Iterator<Event> addInvitation(Event event) throws CalendarException {
+    public List<Event> addInvitation(Event event) throws CalendarException {
         if (event.getPriority() != Priority.HIGH) return super.addInvitation(event);
         List<Event> cancelledEvents = new ArrayList<>();
         for (Map.Entry<Event, InvitationStatus> entry : invitedTo.entrySet()) {
@@ -51,6 +51,6 @@ public class Staff extends UserClass {
         }
         event.updateStatus(this, Event.InvitationStatus.ACCEPTED);
         invitedTo.put(event, Event.InvitationStatus.ACCEPTED);
-        return cancelledEvents.iterator();
+        return cancelledEvents;
     }
 }

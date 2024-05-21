@@ -9,11 +9,15 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.List;
+import java.util.Set;
 
 public interface Event {
 
     Duration EVENT_DURATION = Duration.of(1, ChronoUnit.HOURS);
 
+    Set<String> getTopics();
+    
     String getName();
 
     LocalDateTime getDate();
@@ -30,13 +34,13 @@ public interface Event {
 
     int getInvited();
 
-    Iterator<Event> invite(User user) throws CalendarException;
+    List<Event> invite(User user) throws CalendarException;
 
     void updateStatus(User user, InvitationStatus status) throws CalendarException;
 
     void remove();
 
-    Iterator<Event> response(User user, Calendar.Response responseType) throws CalendarException;
+    List<Event> response(User user, Calendar.Response responseType) throws CalendarException;
 
     Iterator<Map.Entry<User, InvitationStatus>> getInvitedUsers();
 

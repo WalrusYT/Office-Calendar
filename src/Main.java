@@ -43,6 +43,7 @@ public class Main {
             case Commands.INVITE -> invite(calendar, in);
             case Commands.RESPONSE -> response(calendar, in);
             case Commands.EVENT -> event(calendar, in);
+            case Commands.TOPICS -> topics(calendar, in);
             case Commands.EXIT -> System.out.println(Feedback.BYE);
             default -> System.out.printf(Feedback.UNKNOWN_COMMAND, command.toUpperCase());
         }
@@ -165,7 +166,22 @@ public class Main {
             System.out.printf("%s [%s]%n", entry.getKey().getName(), entry.getValue().name().toLowerCase());
         }
     }
-
+    
+    private static void topics(Calendar calendar, Scanner in) {
+        String topicsStr = in.nextLine().trim();
+        Set<String> topics = Set.of(topicsStr.split(" "));
+        Iterator<Event> events = calendar.topics(topics);
+        if (!events.hasNext()) {
+            System.out.println("No events on those topics.");
+            return;
+        }
+        System.out.printf("Events on topics %s:%n", topicsStr);
+        while (events.hasNext()) {
+            Event event = events.next();
+            String topicsSorted = String.join(" ", event.getTopics());
+            System.out.printf("%s promoted by %s on %s%n", event.getName(), event.getPromoter().getName(), topicsSorted);
+        }
+    }
     /**
      * Commands which allow users to interact with this program and the game
      */

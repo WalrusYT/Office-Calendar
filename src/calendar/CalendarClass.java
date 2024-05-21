@@ -12,6 +12,7 @@ import java.util.*;
 public class CalendarClass implements Calendar {
 
     Map<String, User> accounts = new TreeMap<>();
+    Map<String, List<Event>> topicEvents = new HashMap<String, List<Event>>();
 
     @Override
     public Event getEvent(String promoter, String eventName) {
@@ -36,6 +37,18 @@ public class CalendarClass implements Calendar {
         if (user == null) throw new UserNotFoundException(userName);
         Event event = new EventClass(eventName, user, priority, date, topics);
         user.promoteEvent(event);
+        for (String topic : topics) {
+            if (!topicEvents.containsKey(topic)) topicEvents.put(topic, new ArrayList<>());
+            topicEvents.get(topic).add(event);
+        }
+    }
+
+    @Override
+    public void removeEvent(Event event) {
+        event.remove();
+        for (List<Event> events : topicEvents.values()) {
+            events.remove(event);
+        }
     }
 
     @Override
@@ -57,7 +70,10 @@ public class CalendarClass implements Calendar {
         if (promoterUser == null) throw new UserNotFoundException(promoter);
         Event event = promoterUser.getPromotedEvent(eventName);
         if (event == null) throw new EventNotFoundException(promoterUser.getName(), eventName);
-        return event.invite(inviteeUser);
+        List<Event> cancelledEvents = event.invite(inviteeUser);
+        for (Event e : cancelledEvents)
+            if (e.getPromoter() == promoterUser) removeEvent(e);
+        return cancelledEvents.iterator();
     }
 
     @Override
@@ -67,7 +83,10 @@ public class CalendarClass implements Calendar {
         if (promoterUser == null) throw new UserNotFoundException(promoter);
         Event event = promoterUser.getPromotedEvent(eventName);
         if (event == null) throw new EventNotFoundException(promoterUser.getName(), eventName);
-        return event.response(inviteeUser, responseType);
+        List<Event> cancelledEvents = event.response(inviteeUser, responseType);
+        for (Event e : cancelledEvents)
+            if (e.getPromoter() == promoterUser) removeEvent(e);
+        return cancelledEvents.iterator();
     }
 
     @Override
@@ -79,5 +98,13 @@ public class CalendarClass implements Calendar {
         return event.getInvitedUsers();
     }
 
-
+    @Override
+    public Iterator<Event> topics(Set<String> topics) {
+        Set<Event> events = new TreeSet<>(new EventTopicsComparator());
+        for (String topic : topics) {
+            if (topicEvents.containsKey(topic))
+                events.addAll(topicEvents.get(topic));
+        }
+        return events.iterator();
+    }
 }

@@ -71,7 +71,7 @@ public abstract class UserClass implements User {
     }
 
     @Override
-    public Iterator<Event> addInvitation(Event event) throws CalendarException {
+    public List<Event> addInvitation(Event event) throws CalendarException {
         if (this.isBusy(event.getDate())) throw new AlreadyHasAnEventException(this.name);
         if (invitedTo.containsKey(event)) throw new AlreadyInvitedException(this.name);
         invitedTo.put(event, Event.InvitationStatus.UNANSWERED);
@@ -79,7 +79,7 @@ public abstract class UserClass implements User {
     }
 
     @Override
-    public Iterator<Event> response(Event event, Calendar.Response responseType) {
+    public List<Event> response(Event event, Calendar.Response responseType) {
         if (responseType == Calendar.Response.REJECT) {
             invitedTo.put(event, InvitationStatus.REJECTED);
             return null;
@@ -93,7 +93,7 @@ public abstract class UserClass implements User {
             }
         }
         invitedTo.put(event, Event.InvitationStatus.ACCEPTED);
-        return cancelledEvents.iterator();
+        return cancelledEvents;
     }
 
     @Override

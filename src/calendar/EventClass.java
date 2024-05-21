@@ -5,11 +5,13 @@ import calendar.exceptions.CalendarException;
 import calendar.exceptions.UserNotInvitedException;
 import calendar.user.User;
 import java.time.LocalDateTime;
+import java.util.TreeSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.List;
 
 public class EventClass implements Event {
     private final String name;
@@ -28,8 +30,14 @@ public class EventClass implements Event {
         this.promoter = promoter;
         this.priority = priority;
         this.dateTime = dateTime;
-        this.topics = topics;
         this.invitedUsers = new HashMap<>();
+        this.topics = new TreeSet<>();
+        this.topics.addAll(topics);
+    }
+
+    @Override
+    public Set<String> getTopics() {
+        return topics;
     }
 
     @Override
@@ -58,7 +66,7 @@ public class EventClass implements Event {
     }
 
     @Override
-    public Iterator<Event> invite(User user) throws CalendarException {
+    public List<Event> invite(User user) throws CalendarException {
         invitedUsers.put(user, InvitationStatus.UNANSWERED);
         unanswered++;
         return user.addInvitation(this);
@@ -98,7 +106,7 @@ public class EventClass implements Event {
 	}
 
     @Override
-    public Iterator<Event> response(User user, Calendar.Response responseType) throws CalendarException {
+    public List<Event> response(User user, Calendar.Response responseType) throws CalendarException {
         if (invitedUsers.get(user) != InvitationStatus.UNANSWERED) throw new AlreadyAnsweredException(user.getName());
         updateStatus(user, InvitationStatus.fromResponse(responseType));
         return user.response(this, responseType);
