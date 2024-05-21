@@ -133,18 +133,12 @@ public class Main {
         String invitee = in.nextLine().trim(), promoter = in.next(),
                 eventName = in.nextLine().trim(), responseStr = in.next();
         Iterator<Event> cancelledEvents = null;
-        Calendar.Response responseType = null;
+        Calendar.Response responseType;
         try {
             responseType = Calendar.Response.fromName(responseStr);
-        } catch (UnknownEventResponseException e) {
-            System.out.println(e.getMessage());
-            return;
-        }
-        try {
             cancelledEvents = calendar.response(invitee, promoter, eventName, responseType);
-        } catch (CalendarException e) {
+        } catch (UnknownEventResponseException | CalendarException e) {
             System.out.println(e.getMessage());
-            return;
         }
         System.out.printf(Feedback.REPLIED, invitee, responseStr.toLowerCase());
         if (cancelledEvents == null) return;

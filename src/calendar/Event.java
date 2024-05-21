@@ -32,7 +32,7 @@ public interface Event {
 
     Iterator<Event> invite(User user) throws CalendarException;
 
-    void respond(User user, InvitationStatus status) throws CalendarException;
+    void updateStatus(User user, InvitationStatus status) throws CalendarException;
 
     void remove();
 

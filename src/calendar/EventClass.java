@@ -65,7 +65,7 @@ public class EventClass implements Event {
     }
 
     @Override
-    public void respond(User user, InvitationStatus status) throws CalendarException {
+    public void updateStatus(User user, InvitationStatus status) throws CalendarException {
         if (!invitedUsers.containsKey(user)) throw new UserNotInvitedException(user.getName());
         switch (status) {
             case ACCEPTED -> accepted++;
@@ -100,7 +100,7 @@ public class EventClass implements Event {
     @Override
     public Iterator<Event> response(User user, Calendar.Response responseType) throws CalendarException {
         if (invitedUsers.get(user) != InvitationStatus.UNANSWERED) throw new AlreadyAnsweredException(user.getName());
-        respond(user, InvitationStatus.fromResponse(responseType));
+        updateStatus(user, InvitationStatus.fromResponse(responseType));
         return user.response(this, responseType);
     }
 

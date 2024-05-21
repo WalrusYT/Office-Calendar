@@ -38,7 +38,7 @@ public class Staff extends UserClass {
                 if (e.getPriority() == Priority.HIGH)
                     throw new AlreadyHasAnEventException(name);
                 invitedTo.put(e, Event.InvitationStatus.REJECTED);
-                e.respond(this, Event.InvitationStatus.REJECTED);
+                e.updateStatus(this, Event.InvitationStatus.REJECTED);
                 cancelledEvents.add(e);
             }
         }
@@ -49,7 +49,7 @@ public class Staff extends UserClass {
                 break;
             }
         }
-        event.respond(this, Event.InvitationStatus.ACCEPTED);
+        event.updateStatus(this, Event.InvitationStatus.ACCEPTED);
         invitedTo.put(event, Event.InvitationStatus.ACCEPTED);
         return cancelledEvents.iterator();
     }
