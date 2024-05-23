@@ -102,13 +102,10 @@ public class CalendarClass implements Calendar {
 
     @Override
     public Iterator<Event> topics(List<String> topics) {
-        Set<Event> events = new TreeSet<>(new EventTopicsComparator());
-        for (String topic : topics) {
-            if (topicEvents.containsKey(topic)) {
-                System.out.println(topic);
+        Set<Event> events = new TreeSet<>(new EventTopicsComparator(topics));
+        for (String topic : topics)
+            if (topicEvents.containsKey(topic))
                 events.addAll(topicEvents.get(topic));
-            }
-        }
         return events.iterator();
     }
 }
