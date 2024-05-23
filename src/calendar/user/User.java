@@ -16,10 +16,13 @@ public interface User extends Comparable<User> {
 
     void promoteEvent(Event event) throws CalendarException;
 
+    Iterator<Event> getEvents();
+
     Iterator<Event> getPromotedEvents();
 
     List<Event> addInvitation(Event event) throws CalendarException;
-    List<Event> response(Event event, Calendar.Response responseType);
+
+    List<Event> response(Event event, Calendar.Response responseType) throws CalendarException;
 
     void removeInvitation(Event event);
 

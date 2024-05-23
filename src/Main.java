@@ -8,10 +8,7 @@ import calendar.user.User;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 
 import calendar.Event;
 
@@ -52,10 +49,9 @@ public class Main {
     private static void register(Calendar calendar, Scanner in) {
         String name = in.next(), type = in.next();
         try {
-            User.Type userType = User.Type.fromName(type);
-            calendar.addAccount(name, userType);
+            calendar.addAccount(name, type);
             System.out.printf(Feedback.ACCOUNT_REGISTERED, name);
-        } catch (UnknownTypeException | CalendarException e) {
+        } catch (CalendarException | UnknownTypeException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -77,7 +73,7 @@ public class Main {
         String userName = in.nextLine().trim(), eventName = in.nextLine().trim();
         String priorityStr = in.next();
         LocalDateTime date = LocalDateTime.parse(in.nextLine().trim(), DT_FORMAT);
-        Set<String> topics = Set.of(in.nextLine().split(" "));
+        List<String> topics = List.of(in.nextLine().split(" "));
         try {
             Event.Priority priority = Event.Priority.fromName(priorityStr);
             calendar.addEvent(userName, eventName, priority, date, topics);
@@ -160,16 +156,16 @@ public class Main {
         }
         Event event = calendar.getEvent(promoter, eventName);
         String date = event.getDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH"));
-        System.out.printf("%s occurs on %sh%n", event.getName(), date);
+        System.out.printf("%s occurs on %sh:%n", event.getName(), date);
         while (users.hasNext()) {
             Map.Entry<User, Event.InvitationStatus> entry = users.next();
-            System.out.printf("%s [%s]%n", entry.getKey().getName(), entry.getValue().name().toLowerCase());
+            System.out.printf("%s [%s]%n", entry.getKey().getName(), Calendar.Response.fromStatus(entry.getValue()).name().toLowerCase());
         }
     }
     
     private static void topics(Calendar calendar, Scanner in) {
         String topicsStr = in.nextLine().trim();
-        Set<String> topics = Set.of(topicsStr.split(" "));
+        List<String> topics = List.of(topicsStr.split(" "));
         Iterator<Event> events = calendar.topics(topics);
         if (!events.hasNext()) {
             System.out.println("No events on those topics.");
@@ -215,17 +211,17 @@ public class Main {
         BYE = "Bye!",
         UNKNOWN_COMMAND = "Unknown command %s. Type help to see available commands.%n",
         ACCOUNT_REGISTERED = "%s was registered.%n",
-        NO_ACCOUNTS = "No accounts registered.",
+        NO_ACCOUNTS = "No account registered.",
         ACCOUNTS = "All accounts:",
         EVENT_SCHEDULED = "%s is scheduled.%n",
         EVENTS = "Account %s events:%n",
         EVENT = "%s status [invited %d] [accepted %d] [rejected %d] [unanswered %d]%n",
         NO_EVENTS = "Account %s has no events.%n",
-        INVITED = "%s was invited%n",
+        INVITED = "%s was invited.%n",
         ACCEPTED = "%s accepted the invitation.%n",
-        REJECTED = "%s promoted by %s was rejected%n",
-        REMOVED = "%s promoted by %s was removed%n",
-        REPLIED = "Accounts %s has replied %s to the invitation.%n";
+        REJECTED = "%s promoted by %s was rejected.%n",
+        REMOVED = "%s promoted by %s was removed.%n",
+        REPLIED = "Account %s has replied %s to the invitation.%n";
     }
 
 }

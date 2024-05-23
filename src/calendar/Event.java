@@ -16,7 +16,7 @@ public interface Event {
 
     Duration EVENT_DURATION = Duration.of(1, ChronoUnit.HOURS);
 
-    Set<String> getTopics();
+    List<String> getTopics();
     
     String getName();
 
@@ -34,7 +34,7 @@ public interface Event {
 
     int getInvited();
 
-    List<Event> invite(User user) throws CalendarException;
+    void invite(User user) throws CalendarException;
 
     void updateStatus(User user, InvitationStatus status) throws CalendarException;
 

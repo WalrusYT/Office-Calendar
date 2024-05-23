@@ -6,7 +6,6 @@ import calendar.Event.InvitationStatus;
 import calendar.exceptions.*;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -35,8 +34,13 @@ public class Staff extends UserClass {
             InvitationStatus status = entry.getValue();
             if (status == InvitationStatus.REJECTED) continue;
             if (dateOverlapsEvent(event.getDate(), e.getDate()) && event != e) {
-                if (e.getPriority() == Priority.HIGH)
+                if (e.getPriority() == Priority.HIGH) {
+                    event.invite(this);
+                    event.updateStatus(this, Event.InvitationStatus.REJECTED);
+                    invitedTo.put(e, Event.InvitationStatus.REJECTED);
+                    allEvents.add(event);
                     throw new AlreadyHasAnEventException(name);
+                }
                 invitedTo.put(e, Event.InvitationStatus.REJECTED);
                 e.updateStatus(this, Event.InvitationStatus.REJECTED);
                 cancelledEvents.add(e);
@@ -49,7 +53,9 @@ public class Staff extends UserClass {
                 break;
             }
         }
+        event.invite(this);
         event.updateStatus(this, Event.InvitationStatus.ACCEPTED);
+        allEvents.add(event);
         invitedTo.put(event, Event.InvitationStatus.ACCEPTED);
         return cancelledEvents;
     }

@@ -5,38 +5,32 @@ import calendar.exceptions.CalendarException;
 import calendar.exceptions.UserNotInvitedException;
 import calendar.user.User;
 import java.time.LocalDateTime;
-import java.util.TreeSet;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.List;
+import java.util.*;
 
 public class EventClass implements Event {
     private final String name;
     private final User promoter;
     private final Priority priority;
     private final LocalDateTime dateTime;
-    private final Set<String> topics;
+    private final List<String> topics;
     private final Map<User, InvitationStatus> invitedUsers;
-    private int unanswered = 0, accepted = 0, rejected = 0;
+    private int unanswered = 0, accepted = 1, rejected = 0;
 
     public EventClass(
         String name, User promoter, Priority priority,
-        LocalDateTime dateTime, Set<String> topics
+        LocalDateTime dateTime, List<String> topics
     ) {
         this.name = name;
         this.promoter = promoter;
         this.priority = priority;
         this.dateTime = dateTime;
-        this.invitedUsers = new HashMap<>();
-        this.topics = new TreeSet<>();
-        this.topics.addAll(topics);
+        this.invitedUsers = new LinkedHashMap<>();
+        this.topics = topics;
+        invitedUsers.put(promoter, InvitationStatus.ACCEPTED);
     }
 
     @Override
-    public Set<String> getTopics() {
+    public List<String> getTopics() {
         return topics;
     }
 
@@ -66,10 +60,9 @@ public class EventClass implements Event {
     }
 
     @Override
-    public List<Event> invite(User user) throws CalendarException {
+    public void invite(User user) throws CalendarException {
         invitedUsers.put(user, InvitationStatus.UNANSWERED);
         unanswered++;
-        return user.addInvitation(this);
     }
 
     @Override
@@ -129,5 +122,13 @@ public class EventClass implements Event {
     @Override
     public int hashCode() {
         return Objects.hash(name, promoter);
+    }
+
+    @Override
+    public String toString() {
+        return "EventClass{" +
+                "name='" + name + '\'' +
+                ", promoter=" + promoter +
+                '}';
     }
 }
