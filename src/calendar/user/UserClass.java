@@ -18,7 +18,7 @@ public abstract class UserClass implements User {
     public UserClass(String name) {
         this.name = name;
         promotedEvents = new HashMap<>();
-        invitedTo = new HashMap<>();
+        invitedTo = new LinkedHashMap<>();
         allEvents = new ArrayList<>();
     }
 
@@ -42,6 +42,7 @@ public abstract class UserClass implements User {
     @Override
     public void removeInvitation(Event event) {
         invitedTo.remove(event);
+        allEvents.remove(event);
     }
 
     @Override
@@ -106,7 +107,7 @@ public abstract class UserClass implements User {
         for (Map.Entry<Event, Event.InvitationStatus> entry : invitedTo.entrySet()) {
             Event e = entry.getKey();
             Event.InvitationStatus status = entry.getValue();
-            if (dateOverlapsEvent(event.getDate(), e.getDate())) {
+            if (event != e && dateOverlapsEvent(event.getDate(), e.getDate())) {
                 if (status != Event.InvitationStatus.UNANSWERED) continue;
                 e.updateStatus(this, InvitationStatus.REJECTED);
                 invitedTo.put(e, InvitationStatus.REJECTED);

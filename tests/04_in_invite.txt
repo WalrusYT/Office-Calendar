@@ -99,7 +99,7 @@ david.wallace@dunder.mifflin.com Plenary meeting
 invite bob.vance@vance.refrigeration.com
 grogu@mandalorian.com Some meeting
 invite gareth.keenan@wernham.hogg.co.uk
-grogu@mandalorian.com Some meeting
+super.manager@dunder.mifflin.com Some vip meeting
 invite david.wallace@dunder.mifflin.com
 angela.martin@dunder.mifflin.com Integration celebration
 exit

@@ -100,6 +100,7 @@ public class EventClass implements Event {
 
     @Override
     public List<Event> response(User user, Calendar.Response responseType) throws CalendarException {
+        if (!invitedUsers.containsKey(user)) throw new UserNotInvitedException(user.getName());
         if (invitedUsers.get(user) != InvitationStatus.UNANSWERED) throw new AlreadyAnsweredException(user.getName());
         updateStatus(user, InvitationStatus.fromResponse(responseType));
         return user.response(this, responseType);

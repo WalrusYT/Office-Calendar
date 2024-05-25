@@ -49,6 +49,8 @@ public class Staff extends UserClass {
         for (Event e : promotedEvents.values()) {
             if (dateOverlapsEvent(event.getDate(), e.getDate())) {
                 e.remove();
+                allEvents.remove(e);
+                promotedEvents.remove(e.getName());
                 cancelledEvents.add(e);
                 break;
             }

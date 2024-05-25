@@ -95,12 +95,14 @@ invite oscar.martinez@dunder.mifflin.com
 super.manager@dunder.mifflin.com Some vip meeting
 invite pam.beesly@dunder.mifflin.com
 super.manager@dunder.mifflin.com Some vip meeting
-invite grogu@mandalorian.com
-david.wallace@dunder.mifflin.com Plenary meeting
-invite bob.vance@vance.refrigeration.com
-grogu@mandalorian.com Some meeting
-invite gareth.keenan@wernham.hogg.co.uk
-grogu@mandalorian.com Some meeting
 invite david.wallace@dunder.mifflin.com
 angela.martin@dunder.mifflin.com Integration celebration
+create dwight.schrute@dunder.mifflin.com
+Dwight meeting
+mid 2024 05 31 17
+work meeting
+invite andy.bernard@dunder.mifflin.com
+dwight.schrute@dunder.mifflin.com Dwight meeting
+invite andy.bernard@dunder.mifflin.com
+super.manager@dunder.mifflin.com Some vip meeting
 exit

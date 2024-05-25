@@ -136,6 +136,7 @@ public class Main {
             cancelledEvents = calendar.response(invitee, promoter, eventName, responseType);
         } catch (UnknownEventResponseException | CalendarException e) {
             System.out.println(e.getMessage());
+            return;
         }
         System.out.printf(Feedback.REPLIED, invitee, responseStr.toLowerCase());
         if (cancelledEvents == null) return;
