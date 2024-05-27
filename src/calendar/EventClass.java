@@ -19,7 +19,8 @@ public class EventClass implements Event {
     private final Priority priority;
     private final LocalDateTime dateTime;
     private final List<String> topics;
-    private final Map<User, InvitationStatus> invitedUsers;
+    private final Map<User, InvitationStatus> invitations;
+    private final List<User> invitedUsers;
     private int unanswered = 0, accepted = 1, rejected = 0;
 
     public EventClass(
@@ -31,8 +32,10 @@ public class EventClass implements Event {
         this.priority = priority;
         this.dateTime = dateTime;
         this.topics = topics;
-        this.invitedUsers = new LinkedHashMap<>();
-        invitedUsers.put(promoter, InvitationStatus.ACCEPTED);
+        this.invitations = new HashMap<>();
+        this.invitedUsers = new ArrayList<>();
+        invitations.put(promoter, InvitationStatus.ACCEPTED);
+        invitedUsers.add(promoter);
     }
 
     @Override
@@ -67,25 +70,26 @@ public class EventClass implements Event {
 
     @Override
     public void invite(User user) throws CalendarException {
-        invitedUsers.put(user, InvitationStatus.UNANSWERED);
+        invitations.put(user, InvitationStatus.UNANSWERED);
+        invitedUsers.add(user);
         unanswered++;
     }
 
     @Override
     public void updateStatus(User user, InvitationStatus status) throws CalendarException {
-        if (!invitedUsers.containsKey(user)) throw new UserNotInvitedException(user.getName());
+        if (!invitations.containsKey(user)) throw new UserNotInvitedException(user.getName());
         switch (status) {
             case ACCEPTED -> accepted++;
             case REJECTED -> rejected++;
             case UNANSWERED -> { return; }
         }
         unanswered--;
-        invitedUsers.put(user, status);
+        invitations.put(user, status);
     }
 
     @Override
     public void remove() {
-        for (User user : invitedUsers.keySet())
+        for (User user : invitations.keySet())
             user.removeInvitation(this);
     }
 
@@ -106,16 +110,19 @@ public class EventClass implements Event {
 
     @Override
     public void response(User user, Response response) throws CalendarException {
-        if (!invitedUsers.containsKey(user)) throw new UserNotInvitedException(user.getName());
-        if (invitedUsers.get(user) != InvitationStatus.UNANSWERED)
+        if (!invitations.containsKey(user)) throw new UserNotInvitedException(user.getName());
+        if (invitations.get(user) != InvitationStatus.UNANSWERED)
             throw new AlreadyAnsweredException(user.getName());
         InvitationStatus status = InvitationStatus.fromResponse(response);
         this.updateStatus(user, status);
     }
 
     @Override
-    public Iterator<Map.Entry<User, InvitationStatus>> getInvitedUsers() {
-        return invitedUsers.entrySet().iterator();
+    public Iterator<Map.Entry<User, InvitationStatus>> getInvitations() {
+        List<Map.Entry<User, InvitationStatus>> eventInvitations = new ArrayList<>();
+        for (User user : invitedUsers)
+            eventInvitations.add(Map.entry(user, invitations.get(user)));
+        return eventInvitations.iterator();
     }
 
     @Override

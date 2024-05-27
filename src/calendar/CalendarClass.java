@@ -105,7 +105,7 @@ public class CalendarClass implements Calendar {
         if (user == null) throw new UserNotFoundException(promoter);
         Event event = user.getPromotedEvent(eventName);
         if (event == null) throw new EventNotFoundException(user.getName(), eventName);
-        return event.getInvitedUsers();
+        return event.getInvitations();
     }
 
     @Override

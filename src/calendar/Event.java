@@ -37,7 +37,7 @@ public interface Event {
 
     void response(User user, Calendar.Response responseType) throws CalendarException;
 
-    Iterator<Map.Entry<User, InvitationStatus>> getInvitedUsers();
+    Iterator<Map.Entry<User, InvitationStatus>> getInvitations();
 
     boolean overlaps(Event other);
 
