@@ -4,15 +4,15 @@ import calendar.exceptions.CalendarException;
 import calendar.exceptions.UnknownPriorityException;
 import calendar.user.User;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.List;
 
 public interface Event {
 
-    Duration EVENT_DURATION = Duration.of(1, ChronoUnit.HOURS);
-
+    List<String> getTopics();
+    
     String getName();
 
     LocalDateTime getDate();
@@ -29,14 +29,27 @@ public interface Event {
 
     int getInvited();
 
-    Iterator<Event> invite(User user) throws CalendarException;
+    void invite(User user) throws CalendarException;
 
-    void respond(User user, InvitationStatus status) throws CalendarException;
+    void updateStatus(User user, InvitationStatus status) throws CalendarException;
 
     void remove();
 
+    void response(User user, Calendar.Response responseType) throws CalendarException;
+
+    Iterator<Map.Entry<User, InvitationStatus>> getInvitedUsers();
+
+    boolean overlaps(Event other);
+
     enum InvitationStatus {
-        REJECTED, ACCEPTED, UNANSWERED
+        REJECTED, ACCEPTED, UNANSWERED;
+        public static InvitationStatus fromResponse (Calendar.Response response) {
+            switch (response) {
+                case ACCEPT -> { return ACCEPTED; }
+                case REJECT -> { return REJECTED; }
+                default -> { return null; }
+            }
+        }
     }
 
     enum Priority {

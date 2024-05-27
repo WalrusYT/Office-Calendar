@@ -6,7 +6,6 @@ import calendar.Event.InvitationStatus;
 import calendar.exceptions.*;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -22,36 +21,57 @@ public class Staff extends UserClass {
 
     @Override
     public void promoteEvent(Event event) throws CalendarException {
-        if (event.getPriority() == Priority.HIGH) throw new EventHighCreationForbiddenException(name);
+        if (event.getPriority() == Priority.HIGH)
+            throw new EventHighCreationForbiddenException(name);
         super.promoteEvent(event);
     }
 
     @Override
-    public Iterator<Event> addInvitation(Event event) throws CalendarException {
+    public List<Event> addInvitation(Event event) throws CalendarException {
         if (event.getPriority() != Priority.HIGH) return super.addInvitation(event);
         List<Event> cancelledEvents = new ArrayList<>();
+        List<Event> rejected = rejectInvited(event);
+        Event removedEvent = removePromoted(event);
+        if (removedEvent != null) cancelledEvents.add(removedEvent);
+        cancelledEvents.addAll(rejected);
+        event.invite(this);
+        event.updateStatus(this, Event.InvitationStatus.ACCEPTED);
+        allEvents.add(event);
+        invitedTo.put(event, Event.InvitationStatus.ACCEPTED);
+        return cancelledEvents;
+    }
+
+    protected List<Event> rejectInvited(Event event) throws CalendarException {
+        List<Event> rejected = new ArrayList<>();
         for (Map.Entry<Event, InvitationStatus> entry : invitedTo.entrySet()) {
             Event e = entry.getKey();
             InvitationStatus status = entry.getValue();
             if (status == InvitationStatus.REJECTED) continue;
-            if (dateOverlapsEvent(event.getDate(), e.getDate())) {
-                // они почему-то не написали, что если стафф уже посещает
-                // высокоприоритетное событие, то он не должен принимать новое
-                if (e.getPriority() == Priority.HIGH)
+            if (event.overlaps(e) && event != e) {
+                if (e.getPriority() == Priority.HIGH) {
+                    event.invite(this);
+                    event.updateStatus(this, Event.InvitationStatus.REJECTED);
+                    invitedTo.put(e, Event.InvitationStatus.REJECTED);
+                    allEvents.add(event);
                     throw new AlreadyHasAnEventException(name);
+                }
                 invitedTo.put(e, Event.InvitationStatus.REJECTED);
-                cancelledEvents.add(e);
+                e.updateStatus(this, Event.InvitationStatus.REJECTED);
+                rejected.add(e);
             }
         }
+        return rejected;
+    }
+
+    protected Event removePromoted(Event event) {
         for (Event e : promotedEvents.values()) {
-            if (dateOverlapsEvent(event.getDate(), e.getDate())) {
+            if (event.overlaps(e)) {
                 e.remove();
-                cancelledEvents.add(e);
-                break;
+                allEvents.remove(e);
+                promotedEvents.remove(e.getName());
+                return e;
             }
         }
-        event.respond(this, Event.InvitationStatus.ACCEPTED);
-        invitedTo.put(event, Event.InvitationStatus.ACCEPTED);
-        return cancelledEvents.iterator();
+        return null;
     }
 }

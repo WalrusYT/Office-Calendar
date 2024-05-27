@@ -5,6 +5,7 @@ import calendar.user.Guest;
 import calendar.user.Manager;
 import calendar.user.Staff;
 import calendar.user.User;
+import calendar.Event.InvitationStatus;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -12,11 +13,20 @@ import java.util.*;
 public class CalendarClass implements Calendar {
 
     Map<String, User> accounts = new TreeMap<>();
+    Map<String, List<Event>> topicEvents = new HashMap<>();
 
     @Override
-    public void addAccount(String name, User.Type type) throws CalendarException {
+    public Event getEvent(String promoter, String eventName) {
+        User user = accounts.get(promoter);
+        return user.getPromotedEvent(eventName);
+    }
+
+    @Override
+    public void addAccount(String name, String type)
+            throws CalendarException, UnknownTypeException {
         if (accounts.containsKey(name)) throw new UserAlreadyExistsException(name);
-        User user = switch (type) {
+        User.Type userType = User.Type.fromName(type);
+        User user = switch (userType) {
             case STAFF -> new Staff(name);
             case MANAGER -> new Manager(name);
             case GUEST -> new Guest(name);
@@ -25,11 +35,24 @@ public class CalendarClass implements Calendar {
     }
 
     @Override
-    public void addEvent(String userName, String eventName, Event.Priority priority, LocalDateTime date, Set<String> topics) throws CalendarException {
+    public void addEvent(
+            String userName, String eventName, Event.Priority priority,
+            LocalDateTime date, List<String> topics
+    ) throws CalendarException {
         User user = accounts.get(userName);
         if (user == null) throw new UserNotFoundException(userName);
         Event event = new EventClass(eventName, user, priority, date, topics);
         user.promoteEvent(event);
+        for (String topic : topics) {
+            topicEvents.computeIfAbsent(topic, x -> new ArrayList<>()).add(event);
+        }
+    }
+
+    protected void removeEvent(Event event) {
+        event.remove();
+        for (List<Event> events : topicEvents.values()) {
+            events.remove(event);
+        }
     }
 
     @Override
@@ -41,16 +64,56 @@ public class CalendarClass implements Calendar {
     public Iterator<Event> userEvents(String userName) throws CalendarException {
         User user = accounts.get(userName);
         if (user == null) throw new UserNotFoundException(userName);
-        return user.getPromotedEvents();
+        return user.getEvents();
     }
 
     @Override
-    public Iterator<Event> inviteToEvent(String invitee, String promoter, String eventName) throws CalendarException {
+    public Iterator<Event> inviteToEvent(String invitee, String promoter, String eventName)
+            throws CalendarException {
+        User inviteeUser = accounts.get(invitee), promoterUser = accounts.get(promoter);
+        if (promoterUser == null) throw new UserNotFoundException(promoter);
+        if (inviteeUser == null) throw new UserNotFoundException(invitee);
+        Event event = promoterUser.getPromotedEvent(eventName);
+        if (event == null) throw new EventNotFoundException(promoterUser.getName(), eventName);
+        List<Event> cancelledEvents = inviteeUser.addInvitation(event);
+        if (cancelledEvents == null) return null;
+        for (Event e : cancelledEvents)
+            if (e.getPromoter() == promoterUser) removeEvent(e);
+        return cancelledEvents.iterator();
+    }
+
+    @Override
+    public Iterator<Event> response(
+            String invitee, String promoter, String eventName, Response response
+    ) throws CalendarException {
         User inviteeUser = accounts.get(invitee), promoterUser = accounts.get(promoter);
         if (inviteeUser == null) throw new UserNotFoundException(invitee);
         if (promoterUser == null) throw new UserNotFoundException(promoter);
         Event event = promoterUser.getPromotedEvent(eventName);
         if (event == null) throw new EventNotFoundException(promoterUser.getName(), eventName);
-        return event.invite(inviteeUser);
+        List<Event> cancelledEvents = inviteeUser.response(event, response);
+        if (cancelledEvents == null) return null;
+        for (Event e : cancelledEvents)
+            if (e.getPromoter() == promoterUser) removeEvent(e);
+        return cancelledEvents.iterator();
+    }
+
+    @Override
+    public Iterator<Map.Entry<User, InvitationStatus>> event(String promoter, String eventName)
+            throws CalendarException {
+        User user = accounts.get(promoter);
+        if (user == null) throw new UserNotFoundException(promoter);
+        Event event = user.getPromotedEvent(eventName);
+        if (event == null) throw new EventNotFoundException(user.getName(), eventName);
+        return event.getInvitedUsers();
+    }
+
+    @Override
+    public Iterator<Event> topics(List<String> topics) {
+        Set<Event> events = new TreeSet<>(new EventTopicsComparator(topics));
+        for (String topic : topics)
+            if (topicEvents.containsKey(topic))
+                events.addAll(topicEvents.get(topic));
+        return events.iterator();
     }
 }

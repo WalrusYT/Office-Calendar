@@ -1,22 +1,22 @@
 import calendar.Calendar;
 import calendar.CalendarClass;
 import calendar.exceptions.CalendarException;
+import calendar.exceptions.UnknownEventResponseException;
 import calendar.exceptions.UnknownPriorityException;
 import calendar.exceptions.UnknownTypeException;
 import calendar.user.User;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Iterator;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 
 import calendar.Event;
 
 public class Main {
 
     private static final DateTimeFormatter
-        DT_FORMAT = DateTimeFormatter.ofPattern("yyyy MM dd HH");
+        EVENT_CREATE_FORMAT = DateTimeFormatter.ofPattern("yyyy MM dd HH"),
+        TOPIC_DATE_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy HH");
 
     public static void main(String[] args) {
         Calendar calendar = new CalendarClass();
@@ -39,6 +39,9 @@ public class Main {
             case Commands.CREATE -> create(calendar, in);
             case Commands.EVENTS -> events(calendar, in);
             case Commands.INVITE -> invite(calendar, in);
+            case Commands.RESPONSE -> response(calendar, in);
+            case Commands.EVENT -> event(calendar, in);
+            case Commands.TOPICS -> topics(calendar, in);
             case Commands.EXIT -> System.out.println(Feedback.BYE);
             default -> System.out.printf(Feedback.UNKNOWN_COMMAND, command.toUpperCase());
         }
@@ -47,10 +50,9 @@ public class Main {
     private static void register(Calendar calendar, Scanner in) {
         String name = in.next(), type = in.next();
         try {
-            User.Type userType = User.Type.fromName(type);
-            calendar.addAccount(name, userType);
+            calendar.addAccount(name, type);
             System.out.printf(Feedback.ACCOUNT_REGISTERED, name);
-        } catch (UnknownTypeException | CalendarException e) {
+        } catch (CalendarException | UnknownTypeException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -71,8 +73,8 @@ public class Main {
     private static void create(Calendar calendar, Scanner in) {
         String userName = in.nextLine().trim(), eventName = in.nextLine().trim();
         String priorityStr = in.next();
-        LocalDateTime date = LocalDateTime.parse(in.nextLine().trim(), DT_FORMAT);
-        Set<String> topics = Set.of(in.nextLine().split(" "));
+        LocalDateTime date = LocalDateTime.parse(in.nextLine().trim(), EVENT_CREATE_FORMAT);
+        List<String> topics = List.of(in.nextLine().split(" "));
         try {
             Event.Priority priority = Event.Priority.fromName(priorityStr);
             calendar.addEvent(userName, eventName, priority, date, topics);
@@ -104,7 +106,8 @@ public class Main {
     }
 
     private static void invite(Calendar calendar, Scanner in) {
-        String invitee = in.nextLine().trim(), promoter = in.next(), eventName = in.nextLine().trim();
+        String invitee = in.nextLine().trim(),
+                promoter = in.next(), eventName = in.nextLine().trim();
         Iterator<Event> cancelledEvents;
         try {
             cancelledEvents = calendar.inviteToEvent(invitee, promoter, eventName);
@@ -125,6 +128,60 @@ public class Main {
         }
     }
 
+    private static void response(Calendar calendar, Scanner in) {
+        String invitee = in.nextLine().trim(), promoter = in.next(),
+                eventName = in.nextLine().trim(), responseStr = in.next();
+        Iterator<Event> cancelledEvents;
+        Calendar.Response responseType;
+        try {
+            responseType = Calendar.Response.fromName(responseStr);
+            cancelledEvents = calendar.response(invitee, promoter, eventName, responseType);
+        } catch (UnknownEventResponseException | CalendarException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
+        System.out.printf(Feedback.REPLIED, invitee, responseStr.toLowerCase());
+        while (cancelledEvents.hasNext()) {
+            Event event = cancelledEvents.next();
+            System.out.printf(Feedback.REJECTED, event.getName(), event.getPromoter().getName());
+        }
+    }
+
+    private static void event(Calendar calendar, Scanner in) {
+        String promoter = in.next(),  eventName = in.nextLine().trim();
+        Iterator<Map.Entry<User, Event.InvitationStatus>> users;
+        try {
+            users = calendar.event(promoter, eventName);
+        } catch (CalendarException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
+        Event event = calendar.getEvent(promoter, eventName);
+        String date = event.getDate().format(TOPIC_DATE_FORMAT);
+        System.out.printf(Feedback.EVENT_INFO, event.getName(), date);
+        while (users.hasNext()) {
+            Map.Entry<User, Event.InvitationStatus> entry = users.next();
+            System.out.printf("%s [%s]%n", entry.getKey().getName(),
+                    Calendar.Response.fromStatus(entry.getValue()).name().toLowerCase());
+        }
+    }
+    
+    private static void topics(Calendar calendar, Scanner in) {
+        String topicsStr = in.nextLine().trim();
+        List<String> topics = List.of(topicsStr.split(" "));
+        Iterator<Event> events = calendar.topics(topics);
+        if (!events.hasNext()) {
+            System.out.println(Feedback.NO_EVENTS_FOR_TOPICS);
+            return;
+        }
+        System.out.printf(Feedback.EVENTS_ON_TOPICS, topicsStr);
+        while (events.hasNext()) {
+            Event event = events.next();
+            String topicsSorted = String.join(" ", event.getTopics());
+            System.out.printf(Feedback.EVENT_INFO_TOPICS, event.getName(),
+                    event.getPromoter().getName(), topicsSorted);
+        }
+    }
     /**
      * Commands which allow users to interact with this program and the game
      */
@@ -158,16 +215,21 @@ public class Main {
         BYE = "Bye!",
         UNKNOWN_COMMAND = "Unknown command %s. Type help to see available commands.%n",
         ACCOUNT_REGISTERED = "%s was registered.%n",
-        NO_ACCOUNTS = "No accounts registered.",
+        NO_ACCOUNTS = "No account registered.",
         ACCOUNTS = "All accounts:",
         EVENT_SCHEDULED = "%s is scheduled.%n",
         EVENTS = "Account %s events:%n",
         EVENT = "%s status [invited %d] [accepted %d] [rejected %d] [unanswered %d]%n",
         NO_EVENTS = "Account %s has no events.%n",
-        INVITED = "%s was invited%n",
+        INVITED = "%s was invited.%n",
         ACCEPTED = "%s accepted the invitation.%n",
-        REJECTED = "%s promoted by %s was rejected%n",
-        REMOVED = "%s promoted by %s was removed%n";
+        REJECTED = "%s promoted by %s was rejected.%n",
+        REMOVED = "%s promoted by %s was removed.%n",
+        REPLIED = "Account %s has replied %s to the invitation.%n",
+        EVENT_INFO = "%s occurs on %sh:%n",
+        NO_EVENTS_FOR_TOPICS = "No events on those topics.",
+        EVENTS_ON_TOPICS = "Events on topics %s:%n",
+        EVENT_INFO_TOPICS = "%s promoted by %s on %s%n";
     }
 
 }

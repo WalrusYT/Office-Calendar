@@ -1,33 +1,43 @@
 package calendar;
 
+import calendar.exceptions.AlreadyAnsweredException;
 import calendar.exceptions.CalendarException;
+import calendar.exceptions.UserNotInvitedException;
 import calendar.user.User;
+import calendar.Calendar.Response;
+
+import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 public class EventClass implements Event {
+    public final static Duration EVENT_DURATION = Duration.of(1, ChronoUnit.HOURS);
+
     private final String name;
     private final User promoter;
     private final Priority priority;
     private final LocalDateTime dateTime;
-    private final Set<String> topics;
+    private final List<String> topics;
     private final Map<User, InvitationStatus> invitedUsers;
-    private int unanswered = 0, accepted = 0, rejected = 0;
+    private int unanswered = 0, accepted = 1, rejected = 0;
 
     public EventClass(
         String name, User promoter, Priority priority,
-        LocalDateTime dateTime, Set<String> topics
+        LocalDateTime dateTime, List<String> topics
     ) {
         this.name = name;
         this.promoter = promoter;
         this.priority = priority;
         this.dateTime = dateTime;
         this.topics = topics;
-        this.invitedUsers = new HashMap<>();
+        this.invitedUsers = new LinkedHashMap<>();
+        invitedUsers.put(promoter, InvitationStatus.ACCEPTED);
+    }
+
+    @Override
+    public List<String> getTopics() {
+        return topics;
     }
 
     @Override
@@ -56,19 +66,18 @@ public class EventClass implements Event {
     }
 
     @Override
-    public Iterator<Event> invite(User user) throws CalendarException {
+    public void invite(User user) throws CalendarException {
         invitedUsers.put(user, InvitationStatus.UNANSWERED);
         unanswered++;
-        return user.addInvitation(this);
     }
 
     @Override
-    public void respond(User user, InvitationStatus status) throws CalendarException {
-        if (!invitedUsers.containsKey(user)) throw new CalendarException("");
+    public void updateStatus(User user, InvitationStatus status) throws CalendarException {
+        if (!invitedUsers.containsKey(user)) throw new UserNotInvitedException(user.getName());
         switch (status) {
             case ACCEPTED -> accepted++;
             case REJECTED -> rejected++;
-            default -> throw new CalendarException("");
+            case UNANSWERED -> { return; }
         }
         unanswered--;
         invitedUsers.put(user, status);
@@ -96,6 +105,26 @@ public class EventClass implements Event {
 	}
 
     @Override
+    public void response(User user, Response response) throws CalendarException {
+        if (!invitedUsers.containsKey(user)) throw new UserNotInvitedException(user.getName());
+        if (invitedUsers.get(user) != InvitationStatus.UNANSWERED)
+            throw new AlreadyAnsweredException(user.getName());
+        InvitationStatus status = InvitationStatus.fromResponse(response);
+        this.updateStatus(user, status);
+    }
+
+    @Override
+    public Iterator<Map.Entry<User, InvitationStatus>> getInvitedUsers() {
+        return invitedUsers.entrySet().iterator();
+    }
+
+    @Override
+    public boolean overlaps(Event other) {
+        Duration timeBetweenEvents = Duration.between(this.getDate(), other.getDate()).abs();
+        return timeBetweenEvents.minus(EVENT_DURATION).isNegative();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof EventClass that)) return false;
@@ -106,5 +135,13 @@ public class EventClass implements Event {
     @Override
     public int hashCode() {
         return Objects.hash(name, promoter);
+    }
+
+    @Override
+    public String toString() {
+        return "EventClass{" +
+                "name='" + name + '\'' +
+                ", promoter=" + promoter +
+                '}';
     }
 }
