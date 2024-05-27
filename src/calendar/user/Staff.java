@@ -43,9 +43,9 @@ public class Staff extends UserClass {
 
     protected List<Event> rejectInvited(Event event) throws CalendarException {
         List<Event> rejected = new ArrayList<>();
-        for (Map.Entry<Event, InvitationStatus> entry : invitedTo.entrySet()) {
-            Event e = entry.getKey();
-            InvitationStatus status = entry.getValue();
+        for (Event e : allEvents) {
+            if (promotedEvents.containsKey(e.getName())) continue;
+            InvitationStatus status = invitedTo.get(e);
             if (status == InvitationStatus.REJECTED) continue;
             if (event.overlaps(e) && event != e) {
                 if (e.getPriority() == Priority.HIGH) {

@@ -9,6 +9,9 @@ import java.util.*;
 
 public abstract class UserClass implements User {
     protected final String name;
+    /**
+     *
+     */
     protected final Map<String, Event> promotedEvents;
     protected final Map<Event, InvitationStatus> invitedTo;
     protected final List<Event> allEvents;
@@ -16,7 +19,7 @@ public abstract class UserClass implements User {
     public UserClass(String name) {
         this.name = name;
         promotedEvents = new HashMap<>();
-        invitedTo = new LinkedHashMap<>();
+        invitedTo = new HashMap<>();
         allEvents = new ArrayList<>();
     }
 
@@ -94,9 +97,8 @@ public abstract class UserClass implements User {
             invitedTo.put(event, InvitationStatus.REJECTED);
             return cancelledEvents;
         }
-        for (Map.Entry<Event, Event.InvitationStatus> entry : invitedTo.entrySet()) {
-            Event e = entry.getKey();
-            Event.InvitationStatus status = entry.getValue();
+        for (Event e : allEvents) {
+            Event.InvitationStatus status = invitedTo.get(e);
             if (event.overlaps(e) && event != e) {
                 if (status != Event.InvitationStatus.UNANSWERED) continue;
                 e.updateStatus(this, InvitationStatus.REJECTED);
