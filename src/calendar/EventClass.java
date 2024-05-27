@@ -4,10 +4,16 @@ import calendar.exceptions.AlreadyAnsweredException;
 import calendar.exceptions.CalendarException;
 import calendar.exceptions.UserNotInvitedException;
 import calendar.user.User;
+import calendar.Calendar.Response;
+
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 public class EventClass implements Event {
+    public final static Duration EVENT_DURATION = Duration.of(1, ChronoUnit.HOURS);
+
     private final String name;
     private final User promoter;
     private final Priority priority;
@@ -24,8 +30,8 @@ public class EventClass implements Event {
         this.promoter = promoter;
         this.priority = priority;
         this.dateTime = dateTime;
-        this.invitedUsers = new LinkedHashMap<>();
         this.topics = topics;
+        this.invitedUsers = new LinkedHashMap<>();
         invitedUsers.put(promoter, InvitationStatus.ACCEPTED);
     }
 
@@ -71,7 +77,7 @@ public class EventClass implements Event {
         switch (status) {
             case ACCEPTED -> accepted++;
             case REJECTED -> rejected++;
-            default -> throw new CalendarException("");
+            case UNANSWERED -> { return; }
         }
         unanswered--;
         invitedUsers.put(user, status);
@@ -99,11 +105,12 @@ public class EventClass implements Event {
 	}
 
     @Override
-    public List<Event> response(User user, Calendar.Response responseType) throws CalendarException {
+    public void response(User user, Response response) throws CalendarException {
         if (!invitedUsers.containsKey(user)) throw new UserNotInvitedException(user.getName());
-        if (invitedUsers.get(user) != InvitationStatus.UNANSWERED) throw new AlreadyAnsweredException(user.getName());
-        updateStatus(user, InvitationStatus.fromResponse(responseType));
-        return user.response(this, responseType);
+        if (invitedUsers.get(user) != InvitationStatus.UNANSWERED)
+            throw new AlreadyAnsweredException(user.getName());
+        InvitationStatus status = InvitationStatus.fromResponse(response);
+        this.updateStatus(user, status);
     }
 
     @Override
@@ -111,6 +118,11 @@ public class EventClass implements Event {
         return invitedUsers.entrySet().iterator();
     }
 
+    @Override
+    public boolean overlaps(Event other) {
+        Duration timeBetweenEvents = Duration.between(this.getDate(), other.getDate()).abs();
+        return timeBetweenEvents.minus(EVENT_DURATION).isNegative();
+    }
 
     @Override
     public boolean equals(Object o) {

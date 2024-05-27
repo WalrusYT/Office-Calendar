@@ -18,8 +18,6 @@ public interface User extends Comparable<User> {
 
     Iterator<Event> getEvents();
 
-    Iterator<Event> getPromotedEvents();
-
     List<Event> addInvitation(Event event) throws CalendarException;
 
     List<Event> response(Event event, Calendar.Response responseType) throws CalendarException;

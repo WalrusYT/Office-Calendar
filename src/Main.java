@@ -15,7 +15,8 @@ import calendar.Event;
 public class Main {
 
     private static final DateTimeFormatter
-        DT_FORMAT = DateTimeFormatter.ofPattern("yyyy MM dd HH");
+        EVENT_CREATE_FORMAT = DateTimeFormatter.ofPattern("yyyy MM dd HH"),
+        TOPIC_DATE_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy HH");
 
     public static void main(String[] args) {
         Calendar calendar = new CalendarClass();
@@ -72,7 +73,7 @@ public class Main {
     private static void create(Calendar calendar, Scanner in) {
         String userName = in.nextLine().trim(), eventName = in.nextLine().trim();
         String priorityStr = in.next();
-        LocalDateTime date = LocalDateTime.parse(in.nextLine().trim(), DT_FORMAT);
+        LocalDateTime date = LocalDateTime.parse(in.nextLine().trim(), EVENT_CREATE_FORMAT);
         List<String> topics = List.of(in.nextLine().split(" "));
         try {
             Event.Priority priority = Event.Priority.fromName(priorityStr);
@@ -105,7 +106,8 @@ public class Main {
     }
 
     private static void invite(Calendar calendar, Scanner in) {
-        String invitee = in.nextLine().trim(), promoter = in.next(), eventName = in.nextLine().trim();
+        String invitee = in.nextLine().trim(),
+                promoter = in.next(), eventName = in.nextLine().trim();
         Iterator<Event> cancelledEvents;
         try {
             cancelledEvents = calendar.inviteToEvent(invitee, promoter, eventName);
@@ -129,7 +131,7 @@ public class Main {
     private static void response(Calendar calendar, Scanner in) {
         String invitee = in.nextLine().trim(), promoter = in.next(),
                 eventName = in.nextLine().trim(), responseStr = in.next();
-        Iterator<Event> cancelledEvents = null;
+        Iterator<Event> cancelledEvents;
         Calendar.Response responseType;
         try {
             responseType = Calendar.Response.fromName(responseStr);
@@ -139,7 +141,6 @@ public class Main {
             return;
         }
         System.out.printf(Feedback.REPLIED, invitee, responseStr.toLowerCase());
-        if (cancelledEvents == null) return;
         while (cancelledEvents.hasNext()) {
             Event event = cancelledEvents.next();
             System.out.printf(Feedback.REJECTED, event.getName(), event.getPromoter().getName());
@@ -156,11 +157,12 @@ public class Main {
             return;
         }
         Event event = calendar.getEvent(promoter, eventName);
-        String date = event.getDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH"));
-        System.out.printf("%s occurs on %sh:%n", event.getName(), date);
+        String date = event.getDate().format(TOPIC_DATE_FORMAT);
+        System.out.printf(Feedback.EVENT_INFO, event.getName(), date);
         while (users.hasNext()) {
             Map.Entry<User, Event.InvitationStatus> entry = users.next();
-            System.out.printf("%s [%s]%n", entry.getKey().getName(), Calendar.Response.fromStatus(entry.getValue()).name().toLowerCase());
+            System.out.printf("%s [%s]%n", entry.getKey().getName(),
+                    Calendar.Response.fromStatus(entry.getValue()).name().toLowerCase());
         }
     }
     
@@ -169,14 +171,15 @@ public class Main {
         List<String> topics = List.of(topicsStr.split(" "));
         Iterator<Event> events = calendar.topics(topics);
         if (!events.hasNext()) {
-            System.out.println("No events on those topics.");
+            System.out.println(Feedback.NO_EVENTS_FOR_TOPICS);
             return;
         }
-        System.out.printf("Events on topics %s:%n", topicsStr);
+        System.out.printf(Feedback.EVENTS_ON_TOPICS, topicsStr);
         while (events.hasNext()) {
             Event event = events.next();
             String topicsSorted = String.join(" ", event.getTopics());
-            System.out.printf("%s promoted by %s on %s%n", event.getName(), event.getPromoter().getName(), topicsSorted);
+            System.out.printf(Feedback.EVENT_INFO_TOPICS, event.getName(),
+                    event.getPromoter().getName(), topicsSorted);
         }
     }
     /**
@@ -222,7 +225,11 @@ public class Main {
         ACCEPTED = "%s accepted the invitation.%n",
         REJECTED = "%s promoted by %s was rejected.%n",
         REMOVED = "%s promoted by %s was removed.%n",
-        REPLIED = "Account %s has replied %s to the invitation.%n";
+        REPLIED = "Account %s has replied %s to the invitation.%n",
+        EVENT_INFO = "%s occurs on %sh:%n",
+        NO_EVENTS_FOR_TOPICS = "No events on those topics.",
+        EVENTS_ON_TOPICS = "Events on topics %s:%n",
+        EVENT_INFO_TOPICS = "%s promoted by %s on %s%n";
     }
 
 }

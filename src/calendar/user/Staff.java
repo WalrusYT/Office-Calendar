@@ -21,7 +21,8 @@ public class Staff extends UserClass {
 
     @Override
     public void promoteEvent(Event event) throws CalendarException {
-        if (event.getPriority() == Priority.HIGH) throw new EventHighCreationForbiddenException(name);
+        if (event.getPriority() == Priority.HIGH)
+            throw new EventHighCreationForbiddenException(name);
         super.promoteEvent(event);
     }
 
@@ -29,11 +30,24 @@ public class Staff extends UserClass {
     public List<Event> addInvitation(Event event) throws CalendarException {
         if (event.getPriority() != Priority.HIGH) return super.addInvitation(event);
         List<Event> cancelledEvents = new ArrayList<>();
+        List<Event> rejected = rejectInvited(event);
+        Event removedEvent = removePromoted(event);
+        if (removedEvent != null) cancelledEvents.add(removedEvent);
+        cancelledEvents.addAll(rejected);
+        event.invite(this);
+        event.updateStatus(this, Event.InvitationStatus.ACCEPTED);
+        allEvents.add(event);
+        invitedTo.put(event, Event.InvitationStatus.ACCEPTED);
+        return cancelledEvents;
+    }
+
+    protected List<Event> rejectInvited(Event event) throws CalendarException {
+        List<Event> rejected = new ArrayList<>();
         for (Map.Entry<Event, InvitationStatus> entry : invitedTo.entrySet()) {
             Event e = entry.getKey();
             InvitationStatus status = entry.getValue();
             if (status == InvitationStatus.REJECTED) continue;
-            if (dateOverlapsEvent(event.getDate(), e.getDate()) && event != e) {
+            if (event.overlaps(e) && event != e) {
                 if (e.getPriority() == Priority.HIGH) {
                     event.invite(this);
                     event.updateStatus(this, Event.InvitationStatus.REJECTED);
@@ -43,22 +57,21 @@ public class Staff extends UserClass {
                 }
                 invitedTo.put(e, Event.InvitationStatus.REJECTED);
                 e.updateStatus(this, Event.InvitationStatus.REJECTED);
-                cancelledEvents.add(e);
+                rejected.add(e);
             }
         }
+        return rejected;
+    }
+
+    protected Event removePromoted(Event event) {
         for (Event e : promotedEvents.values()) {
-            if (dateOverlapsEvent(event.getDate(), e.getDate())) {
+            if (event.overlaps(e)) {
                 e.remove();
                 allEvents.remove(e);
                 promotedEvents.remove(e.getName());
-                cancelledEvents.add(e);
-                break;
+                return e;
             }
         }
-        event.invite(this);
-        event.updateStatus(this, Event.InvitationStatus.ACCEPTED);
-        allEvents.add(event);
-        invitedTo.put(event, Event.InvitationStatus.ACCEPTED);
-        return cancelledEvents;
+        return null;
     }
 }
