@@ -19,7 +19,13 @@ public class EventClass implements Event {
     private final Priority priority;
     private final LocalDateTime dateTime;
     private final List<String> topics;
+    /**
+     * Map of user invitations, used to get InvitationStatus of a User in O(1) time
+     */
     private final Map<User, InvitationStatus> invitations;
+    /**
+     * List of invited users, used to remember the sequence the invitations were sent
+     */
     private final List<User> invitedUsers;
     private int unanswered = 0, accepted = 1, rejected = 0;
 

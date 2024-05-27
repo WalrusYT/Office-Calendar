@@ -12,8 +12,20 @@ import java.util.*;
 
 public class CalendarClass implements Calendar {
 
-    Map<String, User> accounts = new TreeMap<>();
-    Map<String, List<Event>> topicEvents = new HashMap<>();
+    /**
+     * Map to store accounts, used to get a User instance by name in O(1) time
+     * Use TreeMap for alphabetic sorting
+     */
+    Map<String, User> accounts;
+    /**
+     * Map to store list of events for each topic and getting these lists in O(1) time
+     */
+    Map<String, List<Event>> topicEvents;
+
+    public CalendarClass() {
+        this.accounts = new TreeMap<>();
+        this.topicEvents = new HashMap<>();
+    }
 
     @Override
     public Event getEvent(String promoter, String eventName) {

@@ -10,10 +10,20 @@ import java.util.*;
 public abstract class UserClass implements User {
     protected final String name;
     /**
-     *
+     * Map for storing this user promoted events and getting them
+     * in O(1) time by event name
      */
     protected final Map<String, Event> promotedEvents;
+    /**
+     * Map for storing invitation status for each event this user was invited to
+     * and getting them in O(1) time by Event object
+     */
     protected final Map<Event, InvitationStatus> invitedTo;
+    /**
+     * List for storing all events (promoted and invited to)
+     * Used to remember in which order the events were added to this user
+     * to remember the sequence they were added in
+     */
     protected final List<Event> allEvents;
 
     public UserClass(String name) {
