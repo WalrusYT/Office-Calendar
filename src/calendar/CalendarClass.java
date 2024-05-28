@@ -79,15 +79,23 @@ public class CalendarClass implements Calendar {
         return user.getEvents();
     }
 
-    @Override
-    public Iterator<Event> inviteToEvent(String invitee, String promoter, String eventName)
+    protected enum InvitationHandler {
+        INVITE, RESPONSE
+    }
+
+    protected Iterator<Event> handleInvitation(
+            String invitee, String promoter, String eventName,
+            Response response, InvitationHandler handler)
             throws CalendarException {
         User inviteeUser = accounts.get(invitee), promoterUser = accounts.get(promoter);
         if (promoterUser == null) throw new UserNotFoundException(promoter);
         if (inviteeUser == null) throw new UserNotFoundException(invitee);
         Event event = promoterUser.getPromotedEvent(eventName);
         if (event == null) throw new EventNotFoundException(promoterUser.getName(), eventName);
-        List<Event> cancelledEvents = inviteeUser.addInvitation(event);
+        List<Event> cancelledEvents = switch (handler) {
+            case INVITE -> inviteeUser.addInvitation(event);
+            case RESPONSE -> inviteeUser.response(event, response);
+        };
         if (cancelledEvents == null) return null;
         for (Event e : cancelledEvents)
             if (e.getPromoter() == promoterUser) removeEvent(e);
@@ -95,19 +103,18 @@ public class CalendarClass implements Calendar {
     }
 
     @Override
+    public Iterator<Event> inviteToEvent(String invitee, String promoter, String eventName)
+            throws CalendarException {
+        return handleInvitation(invitee, promoter, eventName,
+                null, InvitationHandler.INVITE);
+    }
+
+    @Override
     public Iterator<Event> response(
             String invitee, String promoter, String eventName, Response response
     ) throws CalendarException {
-        User inviteeUser = accounts.get(invitee), promoterUser = accounts.get(promoter);
-        if (inviteeUser == null) throw new UserNotFoundException(invitee);
-        if (promoterUser == null) throw new UserNotFoundException(promoter);
-        Event event = promoterUser.getPromotedEvent(eventName);
-        if (event == null) throw new EventNotFoundException(promoterUser.getName(), eventName);
-        List<Event> cancelledEvents = inviteeUser.response(event, response);
-        if (cancelledEvents == null) return null;
-        for (Event e : cancelledEvents)
-            if (e.getPromoter() == promoterUser) removeEvent(e);
-        return cancelledEvents.iterator();
+        return handleInvitation(invitee, promoter, eventName,
+                response, InvitationHandler.RESPONSE);
     }
 
     @Override
