@@ -12,12 +12,22 @@ import java.util.*;
 
 import calendar.Event;
 
+/**
+ * Main program for Office Calendar
+ * @author Ilia Taitsel 67258, Taisiia Hlukha 67398 23/24
+ */
 public class Main {
-
+    /**
+     * Formats the date to a correct format
+     */
     private static final DateTimeFormatter
         EVENT_CREATE_FORMAT = DateTimeFormatter.ofPattern("yyyy MM dd HH"),
         TOPIC_DATE_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy HH");
 
+    /**
+     * Main method. Invokes the command interpreter
+     * @param args command-line arguments (not used in this program)
+     */
     public static void main(String[] args) {
         Calendar calendar = new CalendarClass();
         Scanner in = new Scanner(System.in);
@@ -30,7 +40,13 @@ public class Main {
         in.close();
 
     }
-    
+
+    /**
+     * Handle a command from an output and executes a corresponding method
+     * @param in Scanner object to read user input
+     * @param command String of a command from input
+     * @param calendar Calendar object - the office calendar
+     */
     private static void handleCommand(Scanner in, String command, Calendar calendar) {
         switch (command) {
             case Commands.HELP -> System.out.println(Feedback.HELP);
@@ -47,6 +63,11 @@ public class Main {
         }
     }
 
+    /**
+     * Registers a new account the system
+     * @param calendar Calendar object in which we want register a new user
+     * @param in Scanner object to read user input
+     */
     private static void register(Calendar calendar, Scanner in) {
         String name = in.next(), type = in.next();
         try {
@@ -57,6 +78,10 @@ public class Main {
         }
     }
 
+    /**
+     * Lists all registered accounts
+     * @param calendar Calendar object from which we want list all accounts
+     */
     private static void listAccounts(Calendar calendar){
         Iterator<User> iterator = calendar.listAccounts();
         if (!iterator.hasNext()) {
@@ -70,6 +95,11 @@ public class Main {
         }
     }
 
+    /**
+     * Creates an event.
+     * @param calendar Calendar object in which we want to create an event
+     * @param in Scanner object to read user input
+     */
     private static void create(Calendar calendar, Scanner in) {
         String userName = in.nextLine().trim(), eventName = in.nextLine().trim();
         String priorityStr = in.next();
@@ -84,6 +114,11 @@ public class Main {
         }
     }
 
+    /**
+     * Lists all events of an account
+     * @param calendar Calendar object from which we want to take a list of events from account
+     * @param in Scanner object to read user input
+     */
     private static void events(Calendar calendar, Scanner in) {
         String userName = in.next();
         Iterator<Event> events;
@@ -105,6 +140,11 @@ public class Main {
         }
     }
 
+    /**
+     * Invites a user to an event
+     * @param calendar Calendar object in which we want to make an invitation
+     * @param in Scanner object to read user input
+     */
     private static void invite(Calendar calendar, Scanner in) {
         String invitee = in.nextLine().trim(),
                 promoter = in.next(), eventName = in.nextLine().trim();
@@ -128,6 +168,11 @@ public class Main {
         }
     }
 
+    /**
+     * A user responds to an event invitation
+     * @param calendar Calendar object in which we want to make a response
+     * @param in Scanner object to read user input
+     */
     private static void response(Calendar calendar, Scanner in) {
         String invitee = in.nextLine().trim(), promoter = in.next(),
                 eventName = in.nextLine().trim(), responseStr = in.next();
@@ -147,6 +192,11 @@ public class Main {
         }
     }
 
+    /**
+     * Shows detailed information of an event
+     * @param calendar Calendar object from which we want to take an information about an event
+     * @param in Scanner object to read user input
+     */
     private static void event(Calendar calendar, Scanner in) {
         String promoter = in.next(),  eventName = in.nextLine().trim();
         Iterator<Map.Entry<User, Event.InvitationStatus>> users;
@@ -165,7 +215,12 @@ public class Main {
                     Calendar.Response.fromStatus(entry.getValue()).name().toLowerCase());
         }
     }
-    
+
+    /**
+     * Shows all events that cover a list of topics
+     * @param calendar Calendar object from which we want to take an information topics
+     * @param in Scanner object to read user input
+     */
     private static void topics(Calendar calendar, Scanner in) {
         String topicsStr = in.nextLine().trim();
         List<String> topics = List.of(topicsStr.split(" "));

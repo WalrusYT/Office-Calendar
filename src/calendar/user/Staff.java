@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.Map;
 
 public class Staff extends UserClass {
+    /**
+     * Constructs a staff user with the specific name
+     * @param name name of the staff user
+     */
     public Staff(String name) {
         super(name);
     }
@@ -41,6 +45,13 @@ public class Staff extends UserClass {
         return cancelledEvents;
     }
 
+    /**
+     * Rejects from the invitations when invited to the HIGH event
+     * @param event event that user is invited in
+     * @return list of the rejected events
+     * @throws CalendarException AlreadyHasAnEventException if there is an event with a HIGH
+     * priority in a staff account
+     */
     protected List<Event> rejectInvited(Event event) throws CalendarException {
         List<Event> rejected = new ArrayList<>();
         for (Event e : allEvents) {
@@ -63,6 +74,11 @@ public class Staff extends UserClass {
         return rejected;
     }
 
+    /**
+     * Removes promoted events if the invitation to the given event is more important
+     * @param event event that user is invited in
+     * @return NULL or the event that he removed
+     */
     protected Event removePromoted(Event event) {
         for (Event e : promotedEvents.values()) {
             if (event.overlaps(e)) {

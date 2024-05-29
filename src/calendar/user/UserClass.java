@@ -26,6 +26,10 @@ public abstract class UserClass implements User {
      */
     protected final List<Event> allEvents;
 
+    /**
+     * Constructs a user with the specified name
+     * @param name name of the user
+     */
     public UserClass(String name) {
         this.name = name;
         promotedEvents = new HashMap<>();
@@ -33,6 +37,12 @@ public abstract class UserClass implements User {
         allEvents = new ArrayList<>();
     }
 
+    /**
+     * Checks if a user is able to attend an event
+     * @param event that we check of possibility of attending
+     * @return <code>true</code> if it is possible to attend a given event and
+     * <code>false</code> otherwise
+     */
     protected boolean unableToAttend(Event event) {
         for (Event e : promotedEvents.values())
             if (event.overlaps(e)) return true;

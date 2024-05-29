@@ -11,13 +11,33 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+/**
+ * The Event class represents an event with a name, promoter, priority, date and list of topics
+ */
 public class EventClass implements Event {
+    /**
+     * Event duration
+     */
     public final static Duration EVENT_DURATION = Duration.of(1, ChronoUnit.HOURS);
-
+    /**
+     * Name of the event
+     */
     private final String name;
+    /**
+     * Name of the promoter of the event
+     */
     private final User promoter;
+    /**
+     * Priority of the event
+     */
     private final Priority priority;
+    /**
+     * Date and time of the event
+     */
     private final LocalDateTime dateTime;
+    /**
+     * List of topics of the event
+     */
     private final List<String> topics;
     /**
      * Map of user invitations, used to get InvitationStatus of a User in O(1) time
@@ -27,8 +47,19 @@ public class EventClass implements Event {
      * List of invited users, used to remember the sequence the invitations were sent
      */
     private final List<User> invitedUsers;
+    /**
+     * Numbers of unanswered, accepted and rejected invited users
+     */
     private int unanswered = 0, accepted = 1, rejected = 0;
 
+    /**
+     * Constructs an object with the given name, promoter, priority, dateTime and topics
+     * @param name name of the event
+     * @param promoter user that promoted the event
+     * @param priority priority of the event
+     * @param dateTime date and time of the event
+     * @param topics list of topics of the event
+     */
     public EventClass(
         String name, User promoter, Priority priority,
         LocalDateTime dateTime, List<String> topics
@@ -75,7 +106,7 @@ public class EventClass implements Event {
     }
 
     @Override
-    public void invite(User user) throws CalendarException {
+    public void invite(User user) {
         invitations.put(user, InvitationStatus.UNANSWERED);
         invitedUsers.add(user);
         unanswered++;

@@ -22,6 +22,10 @@ public class CalendarClass implements Calendar {
      */
     Map<String, List<Event>> topicEvents;
 
+    /**
+     * Constructs a Calendar object with the list of an accounts,
+     * and topic events
+     */
     public CalendarClass() {
         this.accounts = new TreeMap<>();
         this.topicEvents = new HashMap<>();
@@ -60,6 +64,10 @@ public class CalendarClass implements Calendar {
         }
     }
 
+    /**
+     * Removes an event from the system
+     * @param event event that should be removed
+     */
     protected void removeEvent(Event event) {
         event.remove();
         for (List<Event> events : topicEvents.values()) {

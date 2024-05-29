@@ -5,6 +5,10 @@ import calendar.exceptions.CalendarException;
 import calendar.exceptions.EventCreationForbiddenException;
 
 public class Guest extends UserClass {
+    /**
+     * Constructs a guest user with the specific name
+     * @param name name of the guest user
+     */
     public Guest(String name) {
         super(name);
     }
